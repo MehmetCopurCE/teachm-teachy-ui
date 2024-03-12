@@ -6,8 +6,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
+        <h3>Mehmet Çopur'dan mesajınız var...</h3>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          Tebrikler, projeyi çalıştırarak büyük bir kısmı tamamlamış bulunmaktasınız. Başarılar :)) 
         </p>
         <a
           className="App-link"
