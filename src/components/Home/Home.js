@@ -8,7 +8,7 @@ function Home() {
 
     useEffect(() => {
         // Token burada tanımlanmalıdır
-        const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDUiLCJpYXQiOjE3MTE1NDQ5MjgsImV4cCI6MTcxMTU0NjcyOH0.ppXSDACnBEToly7S2SRi7lZloD-dfqMjxAmH2PVZEG4';
+        const token = 'YOUR_TOKEN_HERE';
 
         fetch("http://localhost/posts", {
             headers: {
