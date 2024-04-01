@@ -1,41 +1,48 @@
-import React, {useState,useEffect} from "react";
-import ReactDOM from "react-dom";
+import React from 'react';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import ShareIcon from '@mui/icons-material/Share';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-function Post(){
-    const [error,setError]=useState(null);
-    const [isLoaded,setIsLoaded]=useState(false);
-    const [postList,setPostList]=useState([]);
+function Post(props) {
+  const { title, content } = props;
 
-    useEffect( ()=>{
-        fetch("http://localhost:80/posts")
-        .then(res=>res.json())
-        .then(
-            (result)=>{
-             setIsLoaded(true);
-             setPostList(result);
-
-            },
-            (error)=>{
-             setIsLoaded(true);
-             setError(error);
-            }
-        )
-
-    }, [])
-    if(error){
-        return <div> Error </div>;
-    }else if(!isLoaded){
-        return <div> Loading...</div>;
-    }else{
-        return(
-            <ul>
-                {postList.map(post =>(
-                    <li>
-                       {post.title}{post.content}
-                    </li>
-                ))}
-            </ul>
-        );
-    }
+  return (
+    <Card sx={{ maxWidth: 345, backgroundColor: '#FFA500', color: '#fff' }}>
+      <CardHeader
+        action={
+          <IconButton aria-label="settings">
+            <MoreVertIcon />
+          </IconButton>
+        }
+        title={<Typography variant="h6" sx={{ color: '#fff' }}>{title}</Typography>}
+      />
+      <CardContent>
+        <Typography variant="body2" color="text.secondary">
+          {content}
+        </Typography>
+      </CardContent>
+      <CardActions disableSpacing>
+        <IconButton aria-label="add to favorites">
+          <FavoriteIcon />
+        </IconButton>
+        <IconButton aria-label="share">
+          <ShareIcon />
+        </IconButton>
+        <IconButton
+          aria-label="show more"
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+      </CardActions>
+    </Card>
+  );
 }
+
 export default Post;
