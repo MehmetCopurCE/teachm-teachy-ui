@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../appLogin/login-signup/.git"
+		},
+		{
+			"path": "../../../appLogin/login-signup/node_modules"
+		}
+	],
+	"settings": {}
+}
