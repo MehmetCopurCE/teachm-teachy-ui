@@ -11,7 +11,7 @@ function Home() {
 
     useEffect(() => {
         // Token burada tanımlanmalıdır
-        const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDEiLCJpYXQiOjE3MTIxMzk0MTcsImV4cCI6MTcxMjE0MTIxN30.bMysHi8ODVgCBOis2rfspEXXwF5LB2kMzbu1_ZndxH4';
+        const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDEiLCJpYXQiOjE3MTIxNjIxMzQsImV4cCI6MTcxMjE2MzkzNH0.9aIF6MVfnDRoWXtwGCO4jn_rl_jYbSceDZPWW6uiZU4';
 
         fetch("http://localhost/api/posts", {
             headers: {
@@ -43,7 +43,7 @@ function Home() {
              
 
               {postList.map(post => (
-                <Post likes={post.postLikes} userId={post.userId} userName={post.userName} postId={post.id} title={post.title} content={post.content} />
+                <Post likes={post.postLikes} userId={post.userId} userName={post.userName} key={post.id}  postId={post.postId}  title={post.title} content={post.content} />
               ))}
               
             </Container>
