@@ -12,7 +12,7 @@ function Home() {
   const [error, setError] = useState(null);
   const [timestamp, setTimestamp] = useState('');
 
-  const token ='eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDEiLCJpYXQiOjE3MTIxMzQ1MjYsImV4cCI6MTcxMjEzNjMyNn0.C2wjuKdH4KYNk2wVcS41E9UESOt_nq0wPY4wO31yDj4';
+  const token ='eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDExIiwiaWF0IjoxNzEyMTY0Njc4LCJleHAiOjE3MTIxNjY0Nzh9.PGhipU2Gq8AJBJDFCOJP7ft9uz-iuUq18gnilKC2tIk';
 
   useEffect(() => {
     const fetchPosts = async () => {

@@ -1,53 +1,49 @@
-import * as React from 'react';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import HomeIcon from '@mui/icons-material/Home';
-import LoginIcon from '@mui/icons-material/Login';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from 'react-router-dom'; // Import Link component from React Router
+import React from "react";
+import { Link } from "react-router-dom";
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
 
-// Define orange theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#FFA500', // Orange color
-    },
-  },
-});
+function Navbar() {
+    let userId = 5;
 
-export default function Navbar() {
-  const [open, setOpen] = React.useState(false);
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpen(newOpen);
-  };
-
-  return (
-    <ThemeProvider theme={theme}>
-      <div>
-        {/* Button to open the drawer */}
-        <button onClick={toggleDrawer(true)}>Open drawer</button>
+    return (
+        <div>
+            <AppBar position="static" sx={{ backgroundColor: 'orange' }}>
+                <Toolbar>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ color: 'white' }}>
+                            <Box textAlign="left">
+                            <li><Link to="/home">TeachYTeachU</Link></li>
+                            |
+                            |<li><Link to="/loginsignup">Login</Link></li>
+          
+                            </Box>
+                        </Typography>
+                    </Box>
+                    <Typography>
+                  
+                    <Link to="/profile" className="profile-icon-link">
         
-        {/* Drawer component */}
-        <Drawer
-  open={open}
-  onClose={toggleDrawer(false)}
-  anchor="right" // Set the anchor to left
-  sx={{
-    '& .MuiDrawer-paper': {
-      backgroundColor: theme.palette.primary.main,
-      width: '200px',
-    },
-  }}
->
-  {/* Drawer content */}
-</Drawer>
-
-      </div>
-    </ThemeProvider>
-  );
+        </Link>
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+        </div>
+    );
 }
+
+export default Navbar;

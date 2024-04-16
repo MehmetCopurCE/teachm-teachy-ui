@@ -14,14 +14,13 @@ const Profile = () => {
     const [notificationType, setNotificationType] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [pendingRequests, setPendingRequests] = useState([]);
-    
 
-    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDEiLCJpYXQiOjE3MTIxMzQ1MjYsImV4cCI6MTcxMjEzNjMyNn0.C2wjuKdH4KYNk2wVcS41E9UESOt_nq0wPY4wO31yDj4';
+    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDExIiwiaWF0IjoxNzEyMTY0Njc4LCJleHAiOjE3MTIxNjY0Nzh9.PGhipU2Gq8AJBJDFCOJP7ft9uz-iuUq18gnilKC2tIk';
 
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/1`, {
+                const response = await fetch(`http://localhost/api/users/10`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
@@ -40,10 +39,28 @@ const Profile = () => {
             }
         };
       
+        const fetchFriendsList = async () => {
+            try {
+                const response = await fetch(`http://localhost/api/users/10/friends`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch friend list');
+                }
+
+                const data = await response.json();
+                setFriends(data);
+            } catch (error) {
+                console.error('Error fetching friend list:', error);
+            }
+        };
           
         const fetchPendingRequests = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/1/friend-requests`, {
+                const response = await fetch(`http://localhost/api/users/10/friend-requests`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
@@ -61,6 +78,7 @@ const Profile = () => {
         };
 
         fetchUserProfile();
+        fetchFriendsList();
         fetchPendingRequests();
     }, [token]);
 
@@ -95,7 +113,7 @@ const Profile = () => {
         try {
             // when login is here. we are gonna use userId everywhere.
              {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */} 
-            const response = await fetch(`http://localhost/api/users/1/send-friend-request?friendId=8`, {
+            const response = await fetch(`http://localhost/api/users/10/send-friend-request?friendId=17`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -121,7 +139,7 @@ const Profile = () => {
     const handleAcceptFriendRequest = async (requestId) => {
         try {
             {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */}
-            const response = await fetch(`http://localhost/api/users/1/accept-friend-request?senderId=7`, {
+            const response = await fetch(`http://localhost/api/users/10/accept-friend-request?senderId=18`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -151,7 +169,7 @@ const Profile = () => {
     const handleRejectFriendRequest = async (requestId) => {
         try {
              {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */}
-            const response = await fetch(`http://localhost/api/users/1/reject-friend-request?senderId=7`, {
+            const response = await fetch(`http://localhost/api/users/10/reject-friend-request?senderId=19`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -224,22 +242,6 @@ const Profile = () => {
                         borderRadius: '5px',
                         marginBottom: '20px' // Add margin-bottom
                       }}>
-                        {/* <Typography variant="h4" gutterBottom>Friends</Typography>
-                        <List>
-                            {friends.map((friend) => (
-                                <ListItem key={friend.id}>
-                                    <ListItemText primary={friend.username} />
-                                </ListItem>
-                            ))}
-                        </List>
-                    </Paper>
-                    <Paper elevation={3} sx={{
-                        backgroundImage: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', // Example gradient from orange to crimson
-                        color: 'teal[900]', // Text color
-                        padding: '20px',
-                        borderRadius: '5px',
-                        marginBottom: '20px' // Add margin-bottom
-                      }}> */}
                         <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
                         <List>
                             {pendingRequests.map((request) => (
@@ -253,6 +255,23 @@ const Profile = () => {
                     </Paper>
                 </Grid>
             </Grid>
+
+            <Paper elevation={3} sx={{
+                backgroundImage: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', // Example gradient from orange to crimson
+                color: 'teal[900]', // Text color
+                padding: '20px',
+                borderRadius: '5px',
+                marginBottom: '20px' // Add margin-bottom
+              }}>
+                <Typography variant="h4" gutterBottom>Friends</Typography>
+                <List>
+                    {friends.map((friend) => (
+                        <ListItem key={friend.id}>
+                            <ListItemText primary={friend.username} />
+                        </ListItem>
+                    ))}
+                </List>
+            </Paper>
 
             {/* Search input */}
             <TextField
