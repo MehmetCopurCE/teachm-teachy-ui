@@ -1,24 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import Home from './components/Home/Home';
+import Profile from './components/Profile/Profile';
+import ProfileIcon from "./components/Profile/ProfileIcon";
+import Login from './components/LoginSignup/LoginSignup';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h3>Mehmet Çopur'dan mesajınız var...</h3>
-        <p>
-          Tebrikler, projeyi çalıştırarak büyük bir kısmı tamamlamış bulunmaktasınız. Başarılar :)) 
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{ backgroundColor: "	#ff9248" }}>
+      <BrowserRouter>
+        <Navbar />
+        {/* Links to different pages */}
+        <nav>
+          <ul>
+            
+            {/* Include ProfileIcon component */}
+            <li><ProfileIcon /></li>
+          </ul>
+        </nav>
+        {/* Routes for different pages */}
+        <Routes>
+          <Route path="/profile" element={<Profile userId={3} />} />
+          |<Route path="/home" element={<Home />} />
+          |<Route path="/loginsignup" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
