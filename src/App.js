@@ -1,21 +1,31 @@
-import logo from './logo.svg';
-import './App.css';
-import { BrowserRouter,Routes, Route } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Home from './components/Home/Home';
-import User from './components/User/User';
-
+import Profile from './components/Profile/Profile';
+import ProfileIcon from "./components/Profile/ProfileIcon";
+import Login from './components/LoginSignup/LoginSignup';
 
 function App() {
   return (
-    <div className="App">
-     <BrowserRouter>
-     <Navbar></Navbar>
-     <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/users/:userId" element={<User />} />
+    <div className="App" style={{ backgroundColor: "	#ff9248" }}>
+      <BrowserRouter>
+        <Navbar />
+        {/* Links to different pages */}
+        <nav>
+          <ul>
+            
+            {/* Include ProfileIcon component */}
+            <li><ProfileIcon /></li>
+          </ul>
+        </nav>
+        {/* Routes for different pages */}
+        <Routes>
+          <Route path="/profile" element={<Profile userId={3} />} />
+          |<Route path="/home" element={<Home />} />
+          |<Route path="/loginsignup" element={<Login />} />
         </Routes>
-     </BrowserRouter>
+      </BrowserRouter>
     </div>
   );
 }

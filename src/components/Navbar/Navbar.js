@@ -27,12 +27,18 @@ function Navbar() {
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="h6" component="div" sx={{ color: 'white' }}>
                             <Box textAlign="left">
-                                <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>Home</Link>
+                            <li><Link to="/home">TeachYTeachU</Link></li>
+                            |
+                            |<li><Link to="/loginsignup">Login</Link></li>
+          
                             </Box>
                         </Typography>
                     </Box>
                     <Typography>
-                        <Link to={{ pathname: '/users/' + userId }} style={{ color: 'white', textDecoration: 'none' }}>User</Link>
+                  
+                    <Link to="/profile" className="profile-icon-link">
+        
+        </Link>
                     </Typography>
                 </Toolbar>
             </AppBar>
