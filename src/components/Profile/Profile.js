@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, List, ListItem, ListItemText, TextField, Button, Snackbar, Grid, Paper } from '@mui/material';
-import orange from '@mui/material/colors/orange';
-import teal from '@mui/material/colors/teal';
+import { Box, Typography, List, ListItem, ListItemText, TextField, Button, Grid, Paper, Snackbar } from '@mui/material';
 
 const Profile = () => {
-    const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [friends, setFriends] = useState([]);
@@ -14,55 +11,64 @@ const Profile = () => {
     const [notificationType, setNotificationType] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [pendingRequests, setPendingRequests] = useState([]);
-
-    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDExIiwiaWF0IjoxNzEyMTY0Njc4LCJleHAiOjE3MTIxNjY0Nzh9.PGhipU2Gq8AJBJDFCOJP7ft9uz-iuUq18gnilKC2tIk';
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
+        const token = localStorage.getItem('tokenKey');
+        const userId = localStorage.getItem('userId');
+
+        setUserId(userId);
         const fetchUserProfile = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/10`, {
+                const response = await fetch(`http://localhost/api/users/${userId}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': localStorage.getItem('tokenKey'),
+                        'Content-Type': 'application/json' 
                     },
                 });
-
+        
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
                 }
-
-                const data = await response.json();
-                setUserData(data);
+        
+                const userData = await response.json(); // Rename data to userData
+                setUserId(userData); // Set userId with userData, not the response
                 setLoading(false);
+                
             } catch (error) {
                 setError(error.message);
                 setLoading(false);
             }
         };
-      
+        
         const fetchFriendsList = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/10/friends`, {
+                const response = await fetch(`http://localhost/api/users/${userId}/friends`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': localStorage.getItem('tokenKey'),
+                        'Content-Type': 'application/json'
                     },
                 });
-
+        
                 if (!response.ok) {
                     throw new Error('Failed to fetch friend list');
                 }
-
+        
                 const data = await response.json();
-                setFriends(data);
+                // you can't be friends with yourself, apparently. 
+                const filteredFriends = data.filter(friend => friend.friendId !== parseInt(userId));
+                setFriends(filteredFriends);
             } catch (error) {
                 console.error('Error fetching friend list:', error);
             }
         };
-          
+        
         const fetchPendingRequests = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/10/friend-requests`, {
+                const response = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': localStorage.getItem('tokenKey'),
+                        'Content-Type': 'application/json' 
                     },
                 });
 
@@ -76,84 +82,70 @@ const Profile = () => {
                 console.error('Failed to fetch pending friend requests:', error);
             }
         };
-
         fetchUserProfile();
         fetchFriendsList();
         fetchPendingRequests();
-    }, [token]);
+    }, [userId]);
 
-    // Function to handle search
-    const handleSearch = async () => {
-        try {
-            const response = await fetch(`http://localhost/api/users`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch user data for search');
-            }
-
-            const data = await response.json();
-            
-            // Assuming your backend returns an array of users
-            const searchResults = data.filter(user =>
-                user.username.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            
-            setSearchResults(searchResults);
-        } catch (error) {
-            console.error('Failed to fetch user data for search:', error);
-        }
-    };
-
-    // Function to send friend request
+    // Sending friend request to user that is searched by logged user
     const handleSendFriendRequest = async (friendId) => {
         try {
-            // when login is here. we are gonna use userId everywhere.
-             {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */} 
-            const response = await fetch(`http://localhost/api/users/10/send-friend-request?friendId=17`, {
+            console.log("Sending friend request to friendId:", friendId);
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('tokenKey');
+            console.log("Authorization token:", token);
+    
+            const response = await fetch(`http://localhost/api/users/${userId}/send-friend-request?friendId=${friendId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': token,
+                    'Content-Type': 'application/json' // Add Content-Type header if necessary
                 },
             });
-
+    
+            const responseData = await response.json(); // Parse response JSON
+    
             if (!response.ok) {
-                throw new Error('Failed to send friend request');
+                throw new Error(responseData.message || 'Failed to send friend request');
             }
-
+    
             setNotificationType('success');
             setNotificationMessage('Friend request sent successfully!');
+           
             setNotificationOpen(true);
         } catch (error) {
-            console.error('Failed to send friend request:', error);
+            console.error('Failed to send friend request:', error.message);
             setNotificationType('error');
-            setNotificationMessage('Failed to send friend request');
+            setNotificationMessage(error.message || 'Failed to send friend request');
             setNotificationOpen(true);
         }
-    }; 
-
-    // Function to handle accepting friend request
-    const handleAcceptFriendRequest = async (requestId) => {
+    };
+        
+    
+    const handleAcceptFriendRequest = async (senderId) => {
         try {
-            {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */}
-            const response = await fetch(`http://localhost/api/users/10/accept-friend-request?senderId=18`, {
+             console.log("Accepting friend request from friendId:", senderId);  
+             const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('tokenKey');
+            console.log("Authorization token:", token);
+         
+
+            const response = await fetch(`http://localhost/api/users/${userId}/accept-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': token,
+                    'Content-Type': 'application/json' // Add Content-Type header if necessary
                 },
             });
+            const responseData = await response.json(); // Parse response JSON
 
             if (!response.ok) {
                 throw new Error('Failed to accept friend request');
             }
-
-            // Assuming you want to update the list of pending requests after accepting the request
-            const updatedRequests = pendingRequests.filter(request => request.id !== requestId);
-            setPendingRequests(updatedRequests);
-
+    
+            // Remove the accepted friend request from the pending list
+            setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
+    
             setNotificationType('success');
             setNotificationMessage('Friend request accepted successfully!');
             setNotificationOpen(true);
@@ -164,26 +156,31 @@ const Profile = () => {
             setNotificationOpen(true);
         }
     };
-
-    // Function to handle rejecting friend request
-    const handleRejectFriendRequest = async (requestId) => {
+    
+    const handleRejectFriendRequest = async (senderId) => {
         try {
-             {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */}
-            const response = await fetch(`http://localhost/api/users/10/reject-friend-request?senderId=19`, {
+             console.log("Rejecting friend request from friendId:", senderId);  
+             const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('tokenKey');
+            console.log("Authorization token:", token);
+         
+
+            const response = await fetch(`http://localhost/api/users/${userId}/reject-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': token,
+                    'Content-Type': 'application/json' // Add Content-Type header if necessary
                 },
             });
-
+            const responseData = await response.json(); // Parse response JSON
+            
             if (!response.ok) {
                 throw new Error('Failed to reject friend request');
             }
-
-            // Assuming you want to update the list of pending requests after rejecting the request
-            const updatedRequests = pendingRequests.filter(request => request.id !== requestId);
-            setPendingRequests(updatedRequests);
-
+    
+            // Remove the accepted friend request from the pending list
+            setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
+    
             setNotificationType('success');
             setNotificationMessage('Friend request rejected successfully!');
             setNotificationOpen(true);
@@ -194,61 +191,61 @@ const Profile = () => {
             setNotificationOpen(true);
         }
     };
-
-    // Function to handle closing of notification
     const handleCloseNotification = () => {
         setNotificationOpen(false);
     };
+    
+    const handleSearch = async () => {
+        try {
+            const response = await fetch(`http://localhost/api/users`, {
+                headers: {
+                    'Authorization': localStorage.getItem('tokenKey'),
+                },
+            });
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data for search');
+            }
 
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
+            const data = await response.json();
+
+            const searchResults = data.filter(user =>
+                user.username.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            setSearchResults(searchResults);
+        } catch (error) {
+            console.error('Failed to fetch user data for search:', error);
+        }
+    };
 
     return (
-        <Box sx={{
-            padding: '20px',
-          }}>
+        <Box sx={{ padding: '20px' }}>
             <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{
-                        backgroundImage: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', // Example gradient from orange to crimson
-                        color: 'teal[900]', // Text color
-                        padding: '20px',
-                        borderRadius: '5px',
-                        marginBottom: '20px' // Add margin-bottom
-                      }}>
+                    <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
                         <Typography variant="h4" gutterBottom>User Information</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Name:</strong> {userData.username}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Email:</strong> {userData.email}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>First Name:</strong> {userData.firstName}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Last Name:</strong> {userData.lastName}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Question:</strong> {userData.question}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userData.answer}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Role:</strong> {userData.role}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userData.accountType}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {new Date(userData.registrationTime).toLocaleString()}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userData.userStatistic}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Name:</strong> {userId?.username}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Email:</strong> {userId?.email}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>First Name:</strong> {userId?.firstName}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Last Name:</strong> {userId?.lastName}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Security Question:</strong> {userId?.question}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userId?.answer}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Role:</strong> {userId?.role}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userId?.accountType}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {new Date(userId?.registrationTime).toLocaleString()}</Typography>
+                        <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
                     </Paper>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{
-                        backgroundImage: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', // Example gradient from orange to crimson
-                        color: 'teal[900]', // Text color
-                        padding: '20px',
-                        borderRadius: '5px',
-                        marginBottom: '20px' // Add margin-bottom
-                      }}>
+                    <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
                         <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
                         <List>
-                            {pendingRequests.map((request) => (
-                                <ListItem key={request.id}>
+                            {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
+                                <ListItem key={request.senderId}>
                                     <ListItemText primary={request.senderId} />
-                                    <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.id)}>Accept</Button>
-                                    <Button variant="contained" onClick={() => handleRejectFriendRequest(request.id)}>Reject</Button>
+                                    <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
+                                    <Button variant="contained" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
                                 </ListItem>
                             ))}
                         </List>
@@ -256,38 +253,32 @@ const Profile = () => {
                 </Grid>
             </Grid>
 
-            <Paper elevation={3} sx={{
-                backgroundImage: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', // Example gradient from orange to crimson
-                color: 'teal[900]', // Text color
-                padding: '20px',
-                borderRadius: '5px',
-                marginBottom: '20px' // Add margin-bottom
-              }}>
+            <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
                 <Typography variant="h4" gutterBottom>Friends</Typography>
                 <List>
                     {friends.map((friend) => (
-                        <ListItem key={friend.id}>
-                            <ListItemText primary={friend.username} />
+                        <ListItem key={friend.friendId}>
+                            <ListItemText primary={friend.friendUsername} />
                         </ListItem>
                     ))}
                 </List>
             </Paper>
 
-            {/* Search input */}
             <TextField
                 label="Search"
                 variant="outlined"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    handleSearch();
+                }}
             />
-            {/* Button to trigger search */}
-            <Button variant="contained" onClick={handleSearch}>Search</Button>
-            {/* Display search results */}
+ <Button variant="contained" onClick={handleSearch}>Search</Button>
             <List>
                 {searchResults.map((result) => (
                     <ListItem key={result.id}>
                         <ListItemText primary={result.username} />
-                        <Button variant="contained" onClick={() => handleSendFriendRequest(result.id)}>Add Friend</Button>
+                        <Button variant="contained" onClick={() => handleSendFriendRequest(result.id)}>Send Friend Request</Button>
                     </ListItem>
                 ))}
             </List>
