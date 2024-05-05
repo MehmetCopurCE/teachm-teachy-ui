@@ -15,40 +15,49 @@ const Profile = () => {
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [pendingRequests, setPendingRequests] = useState([]);
 
-    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDExIiwiaWF0IjoxNzEyMTY0Njc4LCJleHAiOjE3MTIxNjY0Nzh9.PGhipU2Gq8AJBJDFCOJP7ft9uz-iuUq18gnilKC2tIk';
+    const token = localStorage.getItem('tokenKey');
+    const userId = localStorage.getItem('userId'); // Assuming the server provides the userId upon login
+    console.log('Token:', token);
+    console.log('UserId:', userId);
 
     useEffect(() => {
+        console.log("useEffect called");
         const fetchUserProfile = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/10`, {
+                const response = await fetch(`http://localhost/api/users/${userId}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': localStorage.getItem('tokenKey'),
                     },
                 });
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
+                 
                 }
 
                 const data = await response.json();
                 setUserData(data);
                 setLoading(false);
+
             } catch (error) {
                 setError(error.message);
                 setLoading(false);
+                console.log('Token:', token);
             }
         };
       
         const fetchFriendsList = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/10/friends`, {
+                const response = await fetch(`http://localhost/api/users/${userId}/friends`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('tokenKey'),
                     },
                 });
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch friend list');
+                
                 }
 
                 const data = await response.json();
@@ -60,9 +69,9 @@ const Profile = () => {
           
         const fetchPendingRequests = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/10/friend-requests`, {
+                const response = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': localStorage.getItem('tokenKey'),
                     },
                 });
 
@@ -72,6 +81,7 @@ const Profile = () => {
 
                 const data = await response.json();
                 setPendingRequests(data);
+                console.log(data);
             } catch (error) {
                 console.error('Failed to fetch pending friend requests:', error);
             }
@@ -80,14 +90,14 @@ const Profile = () => {
         fetchUserProfile();
         fetchFriendsList();
         fetchPendingRequests();
-    }, [token]);
+    }, [token, userId]);
 
     // Function to handle search
     const handleSearch = async () => {
         try {
             const response = await fetch(`http://localhost/api/users`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': localStorage.getItem('tokenKey'),
                 },
             });
 
@@ -108,52 +118,51 @@ const Profile = () => {
         }
     };
 
-    // Function to send friend request
-    const handleSendFriendRequest = async (friendId) => {
+    const handleSendFriendRequest = async (userId) => {
         try {
-            // when login is here. we are gonna use userId everywhere.
-             {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */} 
-            const response = await fetch(`http://localhost/api/users/10/send-friend-request?friendId=17`, {
+            const response = await fetch(`http://localhost/api/users/${userId}/send-friend-request`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': localStorage.getItem('tokenKey'),
                 },
             });
-
-            if (!response.ok) {
+    
+            if (response.ok) {
+                setNotificationType('success');
+                setNotificationMessage('Friend request sent successfully!');
+                setNotificationOpen(true);
+            } else {
                 throw new Error('Failed to send friend request');
             }
-
-            setNotificationType('success');
-            setNotificationMessage('Friend request sent successfully!');
-            setNotificationOpen(true);
         } catch (error) {
             console.error('Failed to send friend request:', error);
             setNotificationType('error');
             setNotificationMessage('Failed to send friend request');
             setNotificationOpen(true);
         }
-    }; 
-
-    // Function to handle accepting friend request
-    const handleAcceptFriendRequest = async (requestId) => {
+    };
+    
+    
+    const handleAcceptFriendRequest = async (userId, senderId) => {
         try {
-            {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */}
-            const response = await fetch(`http://localhost/api/users/10/accept-friend-request?senderId=18`, {
+            await fetch(`http://localhost/api/users/${userId}/accept-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': localStorage.getItem('tokenKey'),
                 },
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to accept friend request');
-            }
-
-            // Assuming you want to update the list of pending requests after accepting the request
-            const updatedRequests = pendingRequests.filter(request => request.id !== requestId);
-            setPendingRequests(updatedRequests);
-
+    
+          
+            const updatedRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
+                headers: {
+                    'Authorization':localStorage.getItem('tokenKey'),
+                },
+            });
+            const updatedRequestsData = await updatedRequestsResponse.json();
+    
+            // Update the state with the updated list of pending requests
+            setPendingRequests(updatedRequestsData);
+    
             setNotificationType('success');
             setNotificationMessage('Friend request accepted successfully!');
             setNotificationOpen(true);
@@ -164,26 +173,27 @@ const Profile = () => {
             setNotificationOpen(true);
         }
     };
-
-    // Function to handle rejecting friend request
-    const handleRejectFriendRequest = async (requestId) => {
+    
+    const handleRejectFriendRequest = async (senderId) => {
         try {
-             {/*}   here we need to write the sender AND RECEİVER. yoksa succes mesajı gelmez  */}
-            const response = await fetch(`http://localhost/api/users/10/reject-friend-request?senderId=19`, {
+            await fetch(`http://localhost/api/users/${userId}/reject-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization':localStorage.getItem('tokenKey'),
                 },
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to reject friend request');
-            }
-
-            // Assuming you want to update the list of pending requests after rejecting the request
-            const updatedRequests = pendingRequests.filter(request => request.id !== requestId);
-            setPendingRequests(updatedRequests);
-
+    
+            // Fetch the updated list of pending requests
+            const updatedRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
+                headers: {
+                    'Authorization':localStorage.getItem('tokenKey'),
+                },
+            });
+            const updatedRequestsData = await updatedRequestsResponse.json();
+    
+            // Update the state with the updated list of pending requests
+            setPendingRequests(updatedRequestsData);
+    
             setNotificationType('success');
             setNotificationMessage('Friend request rejected successfully!');
             setNotificationOpen(true);
@@ -194,6 +204,7 @@ const Profile = () => {
             setNotificationOpen(true);
         }
     };
+    
 
     // Function to handle closing of notification
     const handleCloseNotification = () => {
@@ -208,6 +219,7 @@ const Profile = () => {
         return <div>Error: {error}</div>;
     }
 
+    
     return (
         <Box sx={{
             padding: '20px',
@@ -244,14 +256,15 @@ const Profile = () => {
                       }}>
                         <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
                         <List>
-                            {pendingRequests.map((request) => (
-                                <ListItem key={request.id}>
-                                    <ListItemText primary={request.senderId} />
-                                    <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.id)}>Accept</Button>
-                                    <Button variant="contained" onClick={() => handleRejectFriendRequest(request.id)}>Reject</Button>
-                                </ListItem>
-                            ))}
-                        </List>
+  {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
+    <ListItem key={request.senderId}>
+      <ListItemText primary={request.senderId} />
+      <Button variant="contained" onClick={() => handleAcceptFriendRequest(userId, request.senderId)}>Accept</Button>
+      <Button variant="contained" onClick={() => handleRejectFriendRequest(userId, request.senderId)}>Reject</Button>
+    </ListItem>
+  ))}
+</List>
+
                     </Paper>
                 </Grid>
             </Grid>
@@ -266,8 +279,8 @@ const Profile = () => {
                 <Typography variant="h4" gutterBottom>Friends</Typography>
                 <List>
                     {friends.map((friend) => (
-                        <ListItem key={friend.id}>
-                            <ListItemText primary={friend.username} />
+                        <ListItem key={friend.friendId}>
+                            <ListItemText primary={friend.friendUsername} />
                         </ListItem>
                     ))}
                 </List>
@@ -278,11 +291,13 @@ const Profile = () => {
                 label="Search"
                 variant="outlined"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    // Trigger search function as the user types
+                    handleSearch();
+                }}
             />
-            {/* Button to trigger search */}
-            <Button variant="contained" onClick={handleSearch}>Search</Button>
-            {/* Display search results */}
+            {/* Other JSX code */}
             <List>
                 {searchResults.map((result) => (
                     <ListItem key={result.id}>
@@ -291,16 +306,7 @@ const Profile = () => {
                     </ListItem>
                 ))}
             </List>
-
-            {/* Notification Snackbar */}
-            <Snackbar
-                open={notificationOpen}
-                autoHideDuration={6000}
-                onClose={handleCloseNotification}
-                message={notificationMessage}
-                severity={notificationType} // Add this line to set severity (for MUI v5)
-                sx={{ bottom: '20px' }}
-            />
+            {/* Other JSX code */}
         </Box>
     );
 };

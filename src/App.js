@@ -21,10 +21,14 @@ function App() {
         </nav>
         {/* Routes for different pages */}
         <Routes>
-          <Route path="/profile" element={<Profile userId={3} />} />
-          |<Route path="/home" element={<Home />} />
-          |<Route path="/loginsignup" element={<Login />} />
-        </Routes>
+  {/* Default route redirects to login/signup page */}
+  <Route path="/" element={<Login />} />
+  {/* Other routes */}
+  <Route path="/profile" element={<Profile userId={3} />} />
+  <Route path="/home" element={<Home />} />
+  <Route path="/loginsignup" element={<Login />} />
+</Routes>
+
       </BrowserRouter>
     </div>
   );
