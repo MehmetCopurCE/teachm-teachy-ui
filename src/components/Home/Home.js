@@ -2,23 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Post from "../Post/Post";
-import Comment from "../Comment/Comment";
 import PostForm from "../Post/PostForm";
 
 function Home() {
   const [posts, setPosts] = useState([]);
-  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timestamp, setTimestamp] = useState('');
-  
 
   const token = localStorage.getItem('tokenKey');
-  const userId = localStorage.getItem('userId'); // Assuming the server provides the userId upon login
-  console.log('Token:', token);
-  console.log('UserId:', userId);
-  const userName=localStorage.getItem('userName')
-
+  const userId = localStorage.getItem('userId');
+  const userName = localStorage.getItem('userName');
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -34,39 +28,21 @@ function Home() {
         }
 
         const postData = await response.json();
-        setPosts(postData);
+        const sortedPosts = postData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sıralama işlemi
+        
+        setPosts(sortedPosts);
       } catch (error) {
         setError(error);
       }
     };
 
-    const fetchComments = async () => {
-      try {
-        const response = await fetch("http://localhost/api/comments", {
-          headers: {
-            Authorization: localStorage.getItem("tokenKey"),
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch comments');
-        }
-
-        const commentData = await response.json();
-        setComments(commentData);
-      } catch (error) {
-        setError(error);
-      }
-    };
-
-    Promise.all([fetchPosts(), fetchComments()])
+    fetchPosts()
       .then(() => setLoading(false))
       .catch(error => {
         setError(error);
         setLoading(false);
       });
 
-    // Set static timestamp
     const currentTimestamp = new Date().toLocaleString();
     setTimestamp(currentTimestamp);
   }, [token]);
@@ -84,11 +60,10 @@ function Home() {
       }
 
       const postData = await response.json();
-      setPosts(postData);
-       // Postlar alındığında setLoading(false) çağır
+      const sortedPosts = postData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sıralama işlemi
+      setPosts(sortedPosts);
     } catch (error) {
       setError(error);
-       // Hata oluştuğunda setLoading(false) çağır
     }
   };
 
@@ -106,9 +81,6 @@ function Home() {
   }
   
 
-  
-
-
   return (
     <div className="home">
       <Link to="/profile" className="profile-icon-link">
@@ -125,9 +97,17 @@ function Home() {
             title={post.title}
             content={post.content}
             postLikes={post.postLikes}
-            userId={userId}
-            userName={userName}
-           
+            userId={post.userId}
+            userName={post.username}
+            createdAt={new Date(post.createdAt).toLocaleDateString('en-US', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+            originalPost={post.originPost}
+            refreshPosts={refreshPosts}
           />
         </div>
       ))}

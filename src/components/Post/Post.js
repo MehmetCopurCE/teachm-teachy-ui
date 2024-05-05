@@ -15,6 +15,9 @@ import { Link } from 'react-router-dom';
 import Comment from "../Comment/Comment";
 import Container from '@mui/material/Container';
 import CommentForm from "../Comment/CommentForm";
+import ReplyForm from "./ReplyForm";
+import ReplyIcon from '@mui/icons-material/Reply';
+
 
 const CardWrapper = styled(Card)(({ theme }) => ({
   width: 800,
@@ -39,18 +42,21 @@ const ExpandIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 function Post(props) {
-  const { title, content, userName, userId, postId, postLikes} = props;
+  const { title, content, userName, userId, postId, postLikes,createdAt,originalPost,refreshPosts} = props;
   const [expanded, setExpanded] = useState(false);
   const [likeCounts, setLikeCounts] = useState(postLikes.length);
   const [isLiked, setIsLiked] = useState(false);
   const [likeId, setLikeId] = useState(null); 
   const [error, setError] = useState(null);
     const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDYiLCJpYXQiOjE3MTQxMTk3MjAsImV4cCI6MTcxNDEyMTUyMH0.1XYungi_EugLAlYoF0H9tCbZjiI6vm1vYDoPIyDDL2A";
-  
+    const [showReplyForm, setShowReplyForm] = useState(false); 
   const [isLoaded, setIsLoaded] = useState(false);
   const [commentList,setCommentList]=useState([]);
   const [refresh, setRefresh] = useState(false);
  
+  const handleReplyClick = () => {
+    setShowReplyForm(true);
+  };
     
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -63,7 +69,41 @@ const setCommentRefresh = () => {
   setRefresh(true);
 }
 
+const handleReplySubmit = async (replyData) => {
+  try {
+    const response = await fetch("http://localhost/api/posts/repost", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem("tokenKey"),
+      },
+      body: JSON.stringify({
+        userId: localStorage.userId,
+        originalPostId: postId,
+        title: replyData.title,
+        content: replyData.content,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit reply');
+    }
+
+    // Assuming successful submission, close the reply form
+    setShowReplyForm(false);
+    refreshPosts();
+
+    // Optionally, you can handle additional actions after successful submission
+  } catch (error) {
+    setError(error.message);
+  }
+};
+
 const handleLike=()=>{
+  if (userId == localStorage.userId) {
+    console.log("Kendi postunu beğenemezsiniz.");
+    return;
+  }
   setIsLiked(!isLiked);
   if(!isLiked){
    saveLike();
@@ -169,6 +209,10 @@ useEffect(()=>{
   refreshComments();
 })
 
+useEffect(() => {
+  handleReplySubmit();
+}, []);
+
 useEffect(() => {checkLikes()},[])
   return (
     <div className="postContainer">
@@ -186,14 +230,36 @@ useEffect(() => {checkLikes()},[])
         />
 
         <ContentWrapper>
-        <Typography variant="h6" color="textPrimary" gutterBottom>
-      {title}
+        <Typography variant="h7" className="postTitle" >
+      <b>{title}</b>
     </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" >
             
             {content}
           </Typography>
+          <div style={{ borderTop: '1px solid #ccc', marginTop: 10, paddingTop: 10 }}>
+            <Typography variant="body2" color="text.secondary">
+              {createdAt}
+            </Typography>
+          </div>
         </ContentWrapper>
+        {originalPost && (
+          <ContentWrapper>
+            <Card>
+              <CardContent>
+                <Typography variant="h7">
+                  <b>{originalPost.title}</b>
+                </Typography>
+                <Typography variant="body2">
+                  {originalPost.content}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Reposted from: {originalPost.username}
+                </Typography>
+              </CardContent>
+            </Card>
+          </ContentWrapper>
+        )}
         <CardActions disableSpacing>
           <IconButton
            onClick={handleLike}
@@ -202,6 +268,12 @@ useEffect(() => {checkLikes()},[])
             <FavoriteIcon style={isLiked ? { color: "red" } : null} />
           </IconButton>
           {likeCounts}
+          <IconButton
+            onClick={handleReplyClick}
+            aria-label="reply"
+          >
+            <ReplyIcon />
+          </IconButton>
           <ExpandIconButton
             onClick={handleExpandClick}
             aria-expanded={expanded}
@@ -222,10 +294,16 @@ useEffect(() => {checkLikes()},[])
                   createdAt={comment.createdAt}
                 />
               )) : "Loading"}
-                <CommentForm userId = {userId} userName = {userName} postId = {postId} setCommentRefresh={setCommentRefresh}></CommentForm>
+                <CommentForm userId = {localStorage.getItem("currentUser")} userName = {localStorage.getItem("userName")} postId = {postId} setCommentRefresh={setCommentRefresh}></CommentForm>
            
           </Container>
         </Collapse>
+        {showReplyForm && (
+          <Container fixed>
+            <h3>Reply</h3>
+            <ReplyForm onSubmit={handleReplySubmit} />
+          </Container>
+        )}
       </CardWrapper>
     </div>
   );
