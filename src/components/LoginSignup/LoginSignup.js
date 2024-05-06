@@ -91,7 +91,11 @@ function LoginSignup() {
                 console.log(result);
     
                 // Redirect to profile page
+<<<<<<< HEAD
                 window.location.href = "/profile"; // Assuming your profile page route is '/profile'
+=======
+                window.location.href = "/home"; // Assuming your profile page route is '/profile'
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
             } else {
                 throw new Error('Login failed');
             }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -9,15 +9,15 @@ import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import { red } from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Collapse from '@mui/material/Collapse';
-import CommentIcon from '@mui/icons-material/Comment';
 import { Link } from 'react-router-dom';
+import Comment from "../Comment/Comment";
 import Container from '@mui/material/Container';
-import { PostWithAuth, DeleteWithAuth } from "../../services/Httpservice";
-import Comment from "../Comment/Comment"; // Import your Comment component
+import CommentForm from "../Comment/CommentForm";
+import ReplyForm from "./ReplyForm";
+import ReplyIcon from '@mui/icons-material/Reply';
+
 
 const CardWrapper = styled(Card)(({ theme }) => ({
   width: 800,
@@ -42,113 +42,271 @@ const ExpandIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 function Post(props) {
-  const { title, content, userName, userId, postId, likes } = props;
+  const { title, content, userName, userId, postId, postLikes,createdAt,originalPost,refreshPosts} = props;
   const [expanded, setExpanded] = useState(false);
-  const [error, setError] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [commentList, setCommentList] = useState([]);
-
-  const [likeCount, setLikeCount] = useState(likes ? likes.length : 0);
+  const [likeCounts, setLikeCounts] = useState(postLikes.length);
   const [isLiked, setIsLiked] = useState(false);
-  const isInitialMount = useRef(true);
-  const [likeId, setLikeId] = useState(null);
+  const [likeId, setLikeId] = useState(null); 
+  const [error, setError] = useState(null);
+    const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDYiLCJpYXQiOjE3MTQxMTk3MjAsImV4cCI6MTcxNDEyMTUyMH0.1XYungi_EugLAlYoF0H9tCbZjiI6vm1vYDoPIyDDL2A";
+    const [showReplyForm, setShowReplyForm] = useState(false); 
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [commentList,setCommentList]=useState([]);
   const [refresh, setRefresh] = useState(false);
-
-  const checkLikes = () => {
-    var likeControl = likes.find((like => "" + like.userId === userId));
-    if (likeControl != null) {
-      setLikeId(likeControl.id);
-      setIsLiked(true);
-    }
-  }
-
+ 
+  const handleReplyClick = () => {
+    setShowReplyForm(true);
+  };
+    
   const handleExpandClick = () => {
     setExpanded(!expanded);
+    refreshComments();
+    console.log(commentList);
   };
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) {
-      saveLike();
-      setLikeCount(likeCount + 1)
-    }
-    else {
-      deleteLike();
-      setLikeCount(likeCount - 1)
-    }
 
-  }
-  const saveLike = () => {
-    fetch("/likes", {
-      method: "POST",
+
+const setCommentRefresh = () => {
+  setRefresh(true);
+}
+
+const handleReplySubmit = async (replyData) => {
+  try {
+    const response = await fetch("http://localhost/api/posts/repost", {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem("tokenKey"),
       },
       body: JSON.stringify({
+        userId: localStorage.userId,
+        originalPostId: postId,
+        title: replyData.title,
+        content: replyData.content,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to submit reply');
+    }
+
+    // Assuming successful submission, close the reply form
+    setShowReplyForm(false);
+    refreshPosts();
+
+    // Optionally, you can handle additional actions after successful submission
+  } catch (error) {
+    setError(error.message);
+  }
+};
+
+const handleLike=()=>{
+  if (userId == localStorage.userId) {
+    console.log("Kendi postunu beğenemezsiniz.");
+    return;
+  }
+  setIsLiked(!isLiked);
+  if(!isLiked){
+   saveLike();
+   setLikeCounts(likeCounts+1);
+  }else{
+    deleteLike();
+    setLikeCounts(likeCounts-1);
+  }
+}
+
+const saveLike = async () => {
+  try {
+    const response = await fetch("http://localhost/likes", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem("tokenKey"),// Tokeni burada kullanıyoruz
+      },
+      body: JSON.stringify({
+        userId: userId, // props'tan gelen userId değerini kullanıyoruz
         postId: postId,
-        userId: userId,
-      }),
-    })
-      .then((res) => res.json())
-      .catch((err) => console.log(err))
+      })
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create like');
+    }
+    const data = await response.json();
+    var likeId2=data.id;
+    setIsLiked(true);
+    setLikeId(likeId2);
+    console.log("Başarılı: ",userId, postId,likeId2,likeId); // Başarılı mesajı ve title ve content'i consola yazdır
+
+    // Başlık ve içeriği temizle
+  
+   
+  } catch (error) {
+    setError(error);
+    console.log(error);
   }
+};
 
-  const deleteLike = () => {
-    fetch("/likes/" + likeId, {
-      method: "DELETE",
-    })
+const deleteLike = async () => {
+  try {
+    const response = await fetch(`http://localhost/likes/`+likeId, {
+      method: 'DELETE',
+      headers: {
+        
+        Authorization: localStorage.getItem("tokenKey"), // Tokeni burada kullanıyoruz
+      },
+      body: JSON.stringify({
+        likeId: likeId, // props'tan gelen userId değerini kullanıyoruz
+      })
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete like');
 
-      .catch((err) => console.log(err))
+    }
 
+    console.log("Silme işlemi başarılı: ", userId, postId,);
+
+    // Gerekirse, silme işlemi başarılı olduğunda ek işlemler yapabilirsin.
+
+  } catch (error) {
+    setError(error);
+    console.log(error,likeId);
+    
   }
+};
 
+useEffect(() => {
+  checkLikes();
+}, []);
 
+const checkLikes = () => {
+  const likeControl = postLikes.find(like => like && like.userId ==userId);
+  if (likeControl!=null) {
+    setIsLiked(true);
+    setLikeId(likeControl.id);
+  }
+};
+
+const refreshComments = async () => {
+  try {
+    const response = await fetch(`http://localhost/api/comments?postId=${postId}`, {
+      headers: {
+        Authorization: localStorage.getItem("tokenKey"),
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch comments');
+    }
+
+    setIsLoaded(true);
+    const commentData=await response.json();
+    setCommentList(commentData);
+  } catch (error) {
+    setError(error);
+  }
+};
+
+useEffect(()=>{
+  refreshComments();
+})
+
+useEffect(() => {
+  handleReplySubmit();
+}, []);
+
+useEffect(() => {checkLikes()},[])
   return (
     <div className="postContainer">
       <CardWrapper>
         <CardHeader
           avatar={
             <Link to={{ pathname: '/users/' + userId }}>
-              <AvatarWrapper sx={{ bgcolor: "orange" }} aria-label="recipe">
+              <AvatarWrapper sx={{ bgcolor: "orange", textDecoration:"none" }} aria-label="recipe">
                 {userName && userName.charAt(0).toUpperCase()}
+                
               </AvatarWrapper>
             </Link>
           }
-
-          title={title}
-
+          title={userName}
         />
 
         <ContentWrapper>
-          <Typography variant="body2" color="text.secondary">
+        <Typography variant="h7" className="postTitle" >
+      <b>{title}</b>
+    </Typography>
+          <Typography variant="body2" >
+            
             {content}
           </Typography>
+          <div style={{ borderTop: '1px solid #ccc', marginTop: 10, paddingTop: 10 }}>
+            <Typography variant="body2" color="text.secondary">
+              {createdAt}
+            </Typography>
+          </div>
         </ContentWrapper>
+        {originalPost && (
+          <ContentWrapper>
+            <Card>
+              <CardContent>
+                <Typography variant="h7">
+                  <b>{originalPost.title}</b>
+                </Typography>
+                <Typography variant="body2">
+                  {originalPost.content}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Reposted from: {originalPost.username}
+                </Typography>
+              </CardContent>
+            </Card>
+          </ContentWrapper>
+        )}
         <CardActions disableSpacing>
           <IconButton
-            onClick={handleLike}
-            aria-label="add to favorites">
+           onClick={handleLike}
+            aria-label="add to favorites"
+          >
             <FavoriteIcon style={isLiked ? { color: "red" } : null} />
-
           </IconButton>
-          {likeCount}
+          {likeCounts}
+          <IconButton
+            onClick={handleReplyClick}
+            aria-label="reply"
+          >
+            <ReplyIcon />
+          </IconButton>
           <ExpandIconButton
             onClick={handleExpandClick}
             aria-expanded={expanded}
             aria-label="show more"
           >
-            <CommentIcon />
+            <ExpandMoreIcon />
           </ExpandIconButton>
         </CardActions>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            {/* Render the list of Comment components here */}
-            {commentList.map(comment => (
-              <Comment key={comment.id} author={comment.author} content={comment.content} createdAt={comment.createdAt} />
-            ))}
-          </CardContent>
+        <Container fixed>
+            <h3>Comments</h3>
+            {error ? "error" :
+              isLoaded ? commentList.map(comment => (
+                <Comment
+                  key={comment.id}
+                  author={comment.author}
+                  content={comment.content}
+                  createdAt={comment.createdAt}
+                />
+              )) : "Loading"}
+                <CommentForm userId = {localStorage.getItem("currentUser")} userName = {localStorage.getItem("userName")} postId = {postId} setCommentRefresh={setCommentRefresh}></CommentForm>
+           
+          </Container>
         </Collapse>
+        {showReplyForm && (
+          <Container fixed>
+            <h3>Reply</h3>
+            <ReplyForm onSubmit={handleReplySubmit} />
+          </Container>
+        )}
       </CardWrapper>
     </div>
   );
 }
+
 export default Post;

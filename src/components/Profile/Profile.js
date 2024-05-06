@@ -11,6 +11,7 @@ const Profile = () => {
     const [notificationType, setNotificationType] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [pendingRequests, setPendingRequests] = useState([]);
+<<<<<<< HEAD
     const [userId, setUserId] = useState(null);
 
     useEffect(() => {
@@ -18,26 +19,45 @@ const Profile = () => {
         const userId = localStorage.getItem('userId');
 
         setUserId(userId);
+=======
+
+    const token = localStorage.getItem('tokenKey');
+    const userId = localStorage.getItem('userId'); // Assuming the server provides the userId upon login
+    console.log('Token:', token);
+    console.log('UserId:', userId);
+
+    useEffect(() => {
+        console.log("useEffect called");
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
         const fetchUserProfile = async () => {
             try {
                 const response = await fetch(`http://localhost/api/users/${userId}`, {
                     headers: {
                         'Authorization': localStorage.getItem('tokenKey'),
+<<<<<<< HEAD
                         'Content-Type': 'application/json' 
+=======
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
                     },
                 });
         
                 if (!response.ok) {
                     throw new Error('Failed to fetch user data');
+                 
                 }
         
                 const userData = await response.json(); // Rename data to userData
                 setUserId(userData); // Set userId with userData, not the response
                 setLoading(false);
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
             } catch (error) {
                 setError(error.message);
                 setLoading(false);
+                console.log('Token:', token);
             }
         };
         
@@ -45,13 +65,19 @@ const Profile = () => {
             try {
                 const response = await fetch(`http://localhost/api/users/${userId}/friends`, {
                     headers: {
+<<<<<<< HEAD
                         'Authorization': localStorage.getItem('tokenKey'),
                         'Content-Type': 'application/json'
+=======
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('tokenKey'),
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
                     },
                 });
         
                 if (!response.ok) {
                     throw new Error('Failed to fetch friend list');
+                
                 }
         
                 const data = await response.json();
@@ -68,7 +94,10 @@ const Profile = () => {
                 const response = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
                     headers: {
                         'Authorization': localStorage.getItem('tokenKey'),
+<<<<<<< HEAD
                         'Content-Type': 'application/json' 
+=======
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
                     },
                 });
 
@@ -78,6 +107,7 @@ const Profile = () => {
 
                 const data = await response.json();
                 setPendingRequests(data);
+                console.log(data);
             } catch (error) {
                 console.error('Failed to fetch pending friend requests:', error);
             }
@@ -85,6 +115,7 @@ const Profile = () => {
         fetchUserProfile();
         fetchFriendsList();
         fetchPendingRequests();
+<<<<<<< HEAD
     }, [userId]);
 
     // Sending friend request to user that is searched by logged user
@@ -113,6 +144,52 @@ const Profile = () => {
             setNotificationMessage('Friend request sent successfully!');
            
             setNotificationOpen(true);
+=======
+    }, [token, userId]);
+
+    // Function to handle search
+    const handleSearch = async () => {
+        try {
+            const response = await fetch(`http://localhost/api/users`, {
+                headers: {
+                    'Authorization': localStorage.getItem('tokenKey'),
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data for search');
+            }
+
+            const data = await response.json();
+            
+            // Assuming your backend returns an array of users
+            const searchResults = data.filter(user =>
+                user.username.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            
+            setSearchResults(searchResults);
+        } catch (error) {
+            console.error('Failed to fetch user data for search:', error);
+        }
+    };
+
+    const handleSendFriendRequest = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost/api/users/${userId}/send-friend-request`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': localStorage.getItem('tokenKey'),
+                },
+            });
+    
+            if (response.ok) {
+                setNotificationType('success');
+                setNotificationMessage('Friend request sent successfully!');
+                setNotificationOpen(true);
+            } else {
+                throw new Error('Failed to send friend request');
+            }
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
         } catch (error) {
             console.error('Failed to send friend request:', error.message);
             setNotificationType('error');
@@ -120,6 +197,7 @@ const Profile = () => {
             setNotificationOpen(true);
         }
     };
+<<<<<<< HEAD
         
     
     const handleAcceptFriendRequest = async (senderId) => {
@@ -145,6 +223,29 @@ const Profile = () => {
     
             // Remove the accepted friend request from the pending list
             setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
+=======
+    
+    
+    const handleAcceptFriendRequest = async (userId, senderId) => {
+        try {
+            await fetch(`http://localhost/api/users/${userId}/accept-friend-request?senderId=${senderId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': localStorage.getItem('tokenKey'),
+                },
+            });
+    
+          
+            const updatedRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
+                headers: {
+                    'Authorization':localStorage.getItem('tokenKey'),
+                },
+            });
+            const updatedRequestsData = await updatedRequestsResponse.json();
+    
+            // Update the state with the updated list of pending requests
+            setPendingRequests(updatedRequestsData);
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
     
             setNotificationType('success');
             setNotificationMessage('Friend request accepted successfully!');
@@ -159,6 +260,7 @@ const Profile = () => {
     
     const handleRejectFriendRequest = async (senderId) => {
         try {
+<<<<<<< HEAD
              console.log("Rejecting friend request from friendId:", senderId);  
              const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
@@ -180,6 +282,25 @@ const Profile = () => {
     
             // Remove the accepted friend request from the pending list
             setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
+=======
+            await fetch(`http://localhost/api/users/${userId}/reject-friend-request?senderId=${senderId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization':localStorage.getItem('tokenKey'),
+                },
+            });
+    
+            // Fetch the updated list of pending requests
+            const updatedRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
+                headers: {
+                    'Authorization':localStorage.getItem('tokenKey'),
+                },
+            });
+            const updatedRequestsData = await updatedRequestsResponse.json();
+    
+            // Update the state with the updated list of pending requests
+            setPendingRequests(updatedRequestsData);
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
     
             setNotificationType('success');
             setNotificationMessage('Friend request rejected successfully!');
@@ -191,6 +312,12 @@ const Profile = () => {
             setNotificationOpen(true);
         }
     };
+<<<<<<< HEAD
+=======
+    
+
+    // Function to handle closing of notification
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
     const handleCloseNotification = () => {
         setNotificationOpen(false);
     };
@@ -219,6 +346,7 @@ const Profile = () => {
         }
     };
 
+    
     return (
         <Box sx={{ padding: '20px' }}>
             <Grid container spacing={3}>
@@ -241,6 +369,7 @@ const Profile = () => {
                     <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
                         <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
                         <List>
+<<<<<<< HEAD
                             {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
                                 <ListItem key={request.senderId}>
                                     <ListItemText primary={request.senderId} />
@@ -249,6 +378,17 @@ const Profile = () => {
                                 </ListItem>
                             ))}
                         </List>
+=======
+  {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
+    <ListItem key={request.senderId}>
+      <ListItemText primary={request.senderId} />
+      <Button variant="contained" onClick={() => handleAcceptFriendRequest(userId, request.senderId)}>Accept</Button>
+      <Button variant="contained" onClick={() => handleRejectFriendRequest(userId, request.senderId)}>Reject</Button>
+    </ListItem>
+  ))}
+</List>
+
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
                     </Paper>
                 </Grid>
             </Grid>
@@ -270,10 +410,18 @@ const Profile = () => {
                 value={searchQuery}
                 onChange={(e) => {
                     setSearchQuery(e.target.value);
+<<<<<<< HEAD
                     handleSearch();
                 }}
             />
  <Button variant="contained" onClick={handleSearch}>Search</Button>
+=======
+                    // Trigger search function as the user types
+                    handleSearch();
+                }}
+            />
+            {/* Other JSX code */}
+>>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
             <List>
                 {searchResults.map((result) => (
                     <ListItem key={result.id}>
@@ -282,16 +430,7 @@ const Profile = () => {
                     </ListItem>
                 ))}
             </List>
-
-            {/* Notification Snackbar */}
-            <Snackbar
-                open={notificationOpen}
-                autoHideDuration={6000}
-                onClose={handleCloseNotification}
-                message={notificationMessage}
-                severity={notificationType} // Add this line to set severity (for MUI v5)
-                sx={{ bottom: '20px' }}
-            />
+            {/* Other JSX code */}
         </Box>
     );
 };
