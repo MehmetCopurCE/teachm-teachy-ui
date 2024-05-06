@@ -11,15 +11,6 @@ const Profile = () => {
     const [notificationType, setNotificationType] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [pendingRequests, setPendingRequests] = useState([]);
-<<<<<<< HEAD
-    const [userId, setUserId] = useState(null);
-
-    useEffect(() => {
-        const token = localStorage.getItem('tokenKey');
-        const userId = localStorage.getItem('userId');
-
-        setUserId(userId);
-=======
 
     const token = localStorage.getItem('tokenKey');
     const userId = localStorage.getItem('userId'); // Assuming the server provides the userId upon login
@@ -28,7 +19,6 @@ const Profile = () => {
 
     useEffect(() => {
         console.log("useEffect called");
->>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
         const fetchUserProfile = async () => {
             try {
                 const response = await fetch(`http://localhost/api/users/${userId}`, {

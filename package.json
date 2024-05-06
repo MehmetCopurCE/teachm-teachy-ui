@@ -4,30 +4,20 @@
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.4",
-<<<<<<< HEAD
-    "@emotion/styled": "^11.11.5",
-    "@mui/icons-material": "^5.15.15",
-=======
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.14",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
->>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-<<<<<<< HEAD
-    "react-router-dom": "^6.23.0",
-    "react-scripts": "5.0.1",
-=======
     "react-router-dom": "^6.22.3",
     "react-scripts": "^5.0.1",
     "sass": "^1.72.0",
     "styled-components": "^6.1.8",
->>>>>>> 1ab33628046c7ba7c8a9361f378c3d20df2d32c5
     "web-vitals": "^2.1.4"
   },
   "scripts": {
