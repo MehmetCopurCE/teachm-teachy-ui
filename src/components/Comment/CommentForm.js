@@ -10,7 +10,7 @@ function CommentForm({ userId, userName, postId, setCommentRefresh }) {
  
  
   const saveComment = () => {
-   const token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJVc2VyIDYiLCJpYXQiOjE3MTQxMTk3MjAsImV4cCI6MTcxNDEyMTUyMH0.1XYungi_EugLAlYoF0H9tCbZjiI6vm1vYDoPIyDDL2A";
+  
   
     fetch("http://localhost/api/comments", {
       method: "POST",
