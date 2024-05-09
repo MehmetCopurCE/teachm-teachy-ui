@@ -12,94 +12,105 @@ const Profile = () => {
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [userId, setUserId] = useState(null);
+    const [rejectedRequests, setRejectedRequests] = useState([]);
+    const [rejectedList, setRejectedList] = useState([]);
 
     useEffect(() => {
-        const token = localStorage.getItem('tokenKey');
-        const userId = localStorage.getItem('userId');
-
-        setUserId(userId);
-        
-        const fetchUserProfile = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost/api/users/${userId}`, {
+                const token = localStorage.getItem('tokenKey');
+                const userId = localStorage.getItem('userId');
+                setUserId(userId);
+    
+                // Fetch user profile
+                const userProfileResponse = await fetch(`http://localhost/api/users/${userId}`, {
                     headers: {
-                        'Authorization': localStorage.getItem('tokenKey'),
-                        'Content-Type': 'application/json' 
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
                     },
                 });
-        
-                if (!response.ok) {
+    
+                if (!userProfileResponse.ok) {
                     throw new Error('Failed to fetch user data');
                 }
-        
-                const userData = await response.json(); // Rename data to userData
-                setUserId(userData); // Set userId with userData, not the response
+    
+                const userData = await userProfileResponse.json();
+                setUserId(userData);
                 setLoading(false);
-                
+    
+                // Fetch friends list
+                const friendsListResponse = await fetch(`http://localhost/api/users/${userId}/friends`, {
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    },
+                });
+    
+                if (!friendsListResponse.ok) {
+                    throw new Error('Failed to fetch friend list');
+                }
+    
+                const friendsData = await friendsListResponse.json();
+                const filteredFriends = friendsData.filter(friend => friend.friendId !== parseInt(userId));
+                setFriends(filteredFriends);
+    
+                // Fetch pending friend requests
+                const pendingRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    },
+                });
+    
+                if (!pendingRequestsResponse.ok) {
+                    throw new Error('Failed to fetch pending friend requests');
+                }
+    
+                const pendingRequestsData = await pendingRequestsResponse.json();
+                const requestsWithAge = pendingRequestsData.map(request => ({
+                    ...request,
+                    age: calculateAge(request.createdAt)
+                }));
+                setPendingRequests(requestsWithAge);
             } catch (error) {
+                console.error('Error fetching data:', error);
                 setError(error.message);
                 setLoading(false);
             }
         };
-        
-        const fetchFriendsList = async () => {
-            try {
-                const response = await fetch(`http://localhost/api/users/${userId}/friends`, {
-                    headers: {
-                        'Authorization': localStorage.getItem('tokenKey'),
-                        'Content-Type': 'application/json'
-                    },
-                });
-        
-                if (!response.ok) {
-                    throw new Error('Failed to fetch friend list');
-                }
-        
-                const data = await response.json();
-                // you can't be friends with yourself, apparently. 
-                const filteredFriends = data.filter(friend => friend.friendId !== parseInt(userId));
-                setFriends(filteredFriends);
-            } catch (error) {
-                console.error('Error fetching friend list:', error);
-            }
-        };
-      
-
-// Assuming you fetch and update pending requests in useEffect or elsewhere
-// Remember to include createdAt field in the pending requests data
-const fetchPendingRequests = async () => {
-    try {
-        const response = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
-            headers: {
-                'Authorization': localStorage.getItem('tokenKey'),
-                'Content-Type': 'application/json' 
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch pending friend requests');
-        }
-
-        const data = await response.json();
-
-        // Calculate the age for each follow request
-        const requestsWithAge = data.map(request => ({
-            ...request,
-            age: calculateAge(request.createdAt) // Assuming calculateAge function is defined
-        }));
-
-        setPendingRequests(requestsWithAge);
-    } catch (error) {
-        console.error('Failed to fetch pending friend requests:', error);
-    }
-};
-
-        fetchUserProfile();
-        fetchFriendsList();
-        fetchPendingRequests();
+    
+        fetchData();
     }, [userId]);
 
-    // Sending friend request to user that is searched by logged user
+    const fetchRejectedList = async () => {
+        try {
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('tokenKey');
+            
+            const response = await fetch(`http://localhost/api/users/${userId}/rejected-requests`, {
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch rejected list');
+            }
+            
+            const data = await response.json();
+            
+            // Assuming the response data is an array of objects representing rejected friend requests
+            setRejectedList(data);
+        } catch (error) {
+            console.error('Error fetching rejected list:', error.message);
+            // Handle error if needed
+        }
+    };
+    
+    // Call the function to fetch rejected list
+    fetchRejectedList();
+    
     const handleSendFriendRequest = async (friendId) => {
         try {
             console.log("Sending friend request to friendId:", friendId);
@@ -168,15 +179,13 @@ const fetchPendingRequests = async () => {
             setNotificationOpen(true);
         }
     };
-    
     const handleRejectFriendRequest = async (senderId) => {
         try {
-             console.log("Rejecting friend request from friendId:", senderId);  
-             const userId = localStorage.getItem('userId');
+            console.log("Rejecting friend request from friendId:", senderId);  
+            const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
             console.log("Authorization token:", token);
-         
-
+    
             const response = await fetch(`http://localhost/api/users/${userId}/reject-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
@@ -190,8 +199,15 @@ const fetchPendingRequests = async () => {
                 throw new Error('Failed to reject friend request');
             }
     
-            // Remove the accepted friend request from the pending list
+            // Remove the rejected friend request from the pending list
             setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
+    
+            // Add the rejected friend request to the rejected list (if needed)
+            // Modify this part based on how you want to handle rejected requests
+            setRejectedRequests(prevRejected => [
+                ...prevRejected,
+                { senderId, timestamp: responseData.timestamp } // Assuming responseData includes timestamp
+            ]);
     
             setNotificationType('success');
             setNotificationMessage('Friend request rejected successfully!');
@@ -254,81 +270,132 @@ const fetchPendingRequests = async () => {
         }
     };
 
-    return (
-        <Box sx={{ padding: '20px' }}>
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
-                        <Typography variant="h4" gutterBottom>User Information</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Name:</strong> {userId?.username}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Email:</strong> {userId?.email}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>First Name:</strong> {userId?.firstName}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Last Name:</strong> {userId?.lastName}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Security Question:</strong> {userId?.question}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userId?.answer}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Role:</strong> {userId?.role}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userId?.accountType}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {new Date(userId?.registrationTime).toLocaleString()}</Typography>
-                        <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
-                        <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
-                        <List>
-                            {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
-                                <ListItem key={request.senderId}>
-                                    <ListItemText primary={request.senderId} />
-                                    <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
-                                    <Button variant="contained" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </Paper>
-                </Grid>
-            </Grid>
-
-            <Paper elevation={3} sx={{ background: 'linear-gradient(to right, #FFA500, #FF6347, #4682B4)', color: '#FFF', padding: '20px', borderRadius: '5px', marginBottom: '20px' }}>
-                <Typography variant="h4" gutterBottom>Friends</Typography>
+   return (
+    <Box sx={{ padding: '20px' }}>
+      {/* Rejected List */}
+      <Paper elevation={3} sx={{
+                background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
+                color: '#000',
+                padding: '20px',
+                borderRadius: '5px',
+                marginBottom: '20px'
+            }}>
+                <Typography variant="h4" gutterBottom>Rejected Friend Requests</Typography>
                 <List>
-                    {friends.map((friend) => (
-                        <ListItem key={friend.friendId}>
-                            <ListItemText primary={friend.friendUsername} />
+                    {rejectedList.map((request) => (
+                        <ListItem key={request.senderId}>
+                            <ListItemText primary={request.senderId} />
                         </ListItem>
                     ))}
                 </List>
             </Paper>
+        {/* User Information */}
+        <Paper elevation={3} sx={{
+            background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
+            color: '#000',
+            padding: '20px',
+            borderRadius: '5px',
+            marginBottom: '20px'
+        }}>
+            <Typography variant="h4" gutterBottom>User Information</Typography>
+            <Typography variant="body1" gutterBottom><strong>Name:</strong> {userId?.username}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Email:</strong> {userId?.email}</Typography>
+            <Typography variant="body1" gutterBottom><strong>First Name:</strong> {userId?.firstName}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Last Name:</strong> {userId?.lastName}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Security Question:</strong> {userId?.question}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userId?.answer}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Role:</strong> {userId?.role}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userId?.accountType}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {new Date(userId?.registrationTime).toLocaleString()}</Typography>
+            <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
+        </Paper>
 
-            <TextField
-                label="Search"
-                variant="outlined"
-                value={searchQuery}
-                onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    handleSearch();
-                }}
-            />
- <Button variant="contained" onClick={handleSearch}>Search</Button>
+        {/* Pending Friend Requests */}
+        <Paper elevation={3} sx={{
+            background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
+            color: '#000',
+            padding: '20px',
+            borderRadius: '5px',
+            marginBottom: '20px'
+        }}>
+            <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
             <List>
-                {searchResults.map((result) => (
-                    <ListItem key={result.id}>
-                        <ListItemText primary={result.username} />
-                        <Button variant="contained" onClick={() => handleSendFriendRequest(result.id)}>Send Friend Request</Button>
+                {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
+                    <ListItem key={request.senderId}>
+                        <ListItemText primary={request.senderId} />
+                        <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
+                        <Button variant="contained" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
                     </ListItem>
                 ))}
             </List>
+        </Paper>
+ {/* Rejected Friend Requests */}
+ <Paper elevation={3} sx={{
+                background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
+                color: '#000',
+                padding: '20px',
+                borderRadius: '5px',
+                marginBottom: '20px'
+            }}>
+                <Typography variant="h4" gutterBottom>Rejected Friend Requests</Typography>
+                <List>
+                    {rejectedRequests.map((request) => (
+                        <ListItem key={request.senderId}>
+                            {/* Render rejected friend request information */}
+                        </ListItem>
+                    ))}
+                </List>
+            </Paper>
+        {/* Friends */}
+        <Paper elevation={3} sx={{
+            background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
+            color: '#000',
+            padding: '20px',
+            borderRadius: '5px',
+            marginBottom: '20px'
+        }}>
+            <Typography variant="h4" gutterBottom>Friends</Typography>
+            <List>
+                {friends.map((friend) => (
+                    <ListItem key={friend.friendId}>
+                        <ListItemText primary={friend.friendUsername} />
+                    </ListItem>
+                ))}
+            </List>
+        </Paper>
 
-            {/* Notification Snackbar */}
-            <Snackbar
-                open={notificationOpen}
-                autoHideDuration={6000}
-                onClose={handleCloseNotification}
-                message={notificationMessage}
-                severity={notificationType} // Add this line to set severity (for MUI v5)
-                sx={{ bottom: '20px' }}
-            />
-        </Box>
-    );
+        {/* Search */}
+        <TextField
+            label="Search"
+            variant="outlined"
+            value={searchQuery}
+            onChange={(e) => {
+                setSearchQuery(e.target.value);
+                handleSearch();
+            }}
+        />
+        <Button variant="contained" onClick={handleSearch}>Search</Button>
+        <List>
+            {searchResults.map((result) => (
+                <ListItem key={result.id}>
+                    <ListItemText primary={result.username} />
+                    <Button variant="contained" onClick={() => handleSendFriendRequest(result.id)}>Send Friend Request</Button>
+                </ListItem>
+            ))}
+        </List>
+
+        {/* Notification Snackbar */}
+        <Snackbar
+            open={notificationOpen}
+            autoHideDuration={6000}
+            onClose={handleCloseNotification}
+            message={notificationMessage}
+            severity={notificationType} // Add this line to set severity (for MUI v5)
+            sx={{ bottom: '20px' }}
+        />
+    </Box>
+);
+
 };
 
 export default Profile;
