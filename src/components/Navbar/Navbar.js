@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -10,40 +10,57 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 function Navbar() {
     let userId = 5;
+    const navigate = useNavigate();
+    const Logout = () => {
+        window.localStorage.removeItem("tokenKey")
+        window.localStorage.removeItem("refreshKey")
+        window.localStorage.removeItem("userId")
+        window.localStorage.removeItem("userName")
+        navigate("/loginsignup");
+    } 
 
     return (
         <div>
             <AppBar position="static" sx={{ backgroundColor: 'orange' }}>
                 <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" component="div" sx={{ color: 'white' }}>
-                            <Box textAlign="left">
-                            <li><Link to="/home">TeachYTeachU</Link></li>
-                            |
-                            |<li><Link to="/loginsignup">Login</Link></li>
-          
-                            </Box>
-                        </Typography>
-                    </Box>
-                    <Typography>
-                  
-                    <Link to="/profile" className="profile-icon-link">
-        
-        </Link>
-                    </Typography>
+            
+                   
+                    <div>
+                    
+                    <button onClick={() => Logout()}>Logout</button>
+
+                </div>
                 </Toolbar>
+               
             </AppBar>
         </div>
     );
 }
 
 export default Navbar;
+
+
+/* /Typography>
+                    <div>
+                    
+                    <button onClick={() => Logout()}>Logout</button>     
+
+                </div>
+                
+                </Toolbar>          bu kısımda bir değişiklilik var 
+
+    const navigate = useNavigate();
+    const Logout = () => {
+        window.localStorage.removeItem("tokenKey")
+        window.localStorage.removeItem("refreshKey")
+        window.localStorage.removeItem("userId")
+        window.localStorage.removeItem("userName")
+        navigate("/loginsignup");
+    }                                               2. olarak bu kısım 
+
+
+    import { Link, useNavigate } from "react-router-dom";
+    3. olarakta bu kısımda 
+    */
+
+    // ayrıca login-signup kısmında da belirli değişiklilikler var ve assets kısmında da bir ekleme var 

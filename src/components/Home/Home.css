@@ -1,50 +1,67 @@
+.container {
+  display: flex;
+  justify-content: space-between; /* Positions the sidebar and home content */
+  padding: 30px 20px;
+}
+
+.sidebar {
+  /* Sidebar styles */
+  width: 270px;
+  height: 423px;
+  background: #FFFFFF;
+  border: 1px solid #EAEAEA;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+}
+
 .home {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    padding: 20px;
-  
-    h2 {
-      color: #333;
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-  
-    .post {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      margin-bottom: 20px;
-  
-      &-title {
-        color: #333;
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-  
-      &-content {
-        color: #666;
-        font-size: 16px;
-      }
-    }
-  
-    .comment {
-      background-color: #f0f0f0;
-      border-radius: 4px;
-      padding: 10px;
-      margin-top: 10px;
-  
-      &-author {
-        color: #444;
-        font-size: 14px;
-        font-weight: bold;
-      }
-  
-      &-content {
-        color: #666;
-        font-size: 14px;
-      }
-    }
-  }
-  
+  /* Home content styles */
+  flex: 1; /* Takes up remaining space */
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.home h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.home .post {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.home .post-title {
+  color: #333;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.home .post-content {
+  color: #666;
+  font-size: 16px;
+}
+
+.home .comment {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.home .comment-author {
+  color: #444;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.home .comment-content {
+  color: #666;
+  font-size: 14px;
+}

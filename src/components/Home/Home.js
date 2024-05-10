@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Post from "../Post/Post";
 import PostForm from "../Post/PostForm";
+import Navbar from "../Navbar/Navbar";
+import Profile from "../Profile/Profile"; // Profil sayfasını içe aktar
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -83,31 +85,39 @@ function Home() {
 
   return (
     <div className="home">
-      <div style={{ marginLeft: '20px', marginRight: '20px', marginBottom: '20px' }}>
-        <PostForm userId={userId} refreshPosts={refreshPosts} />
-      </div>
-      <div className="post-list">
-        {posts.map(post => (
-          <div key={post.id} style={{ marginBottom: '20px' }}>
-            <Post
-              postId={post.id}
-              title={post.title}
-              content={post.content}
-              postLikes={post.postLikes}
-              userId={post.userId}
-              userName={post.username}
-              createdAt={new Date(post.createdAt).toLocaleDateString('en-US', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-              originalPost={post.originPost}
-              refreshPosts={refreshPosts}
-            />
+      <div style={{ display: 'flex' }}> {/* Ana bileşenlerin yan yana yerleştirilmesi */}
+        <div style={{ flex: '1', marginRight: '20px' }}> {/* Postların bulunduğu bölüm */}
+          <div style={{ marginLeft: '20px', marginBottom: '20px' }}>
+            <Navbar/>
+            <PostForm userId={userId} refreshPosts={refreshPosts} />
           </div>
-        ))}
+          <div className="post-list">
+            {posts.map(post => (
+              <div key={post.id} style={{ marginBottom: '20px' }}>
+                <Post
+                  postId={post.id}
+                  title={post.title}
+                  content={post.content}
+                  postLikes={post.postLikes}
+                  userId={post.userId}
+                  userName={post.username}
+                  createdAt={new Date(post.createdAt).toLocaleDateString('en-US', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                  originalPost={post.originPost}
+                  refreshPosts={refreshPosts}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ flex: '1' }}> {/* Profil sayfasının bulunduğu bölüm */}
+          <Profile /> {/* Profil bileşenini burada göster */}
+        </div>
       </div>
     </div>
   );
