@@ -14,7 +14,8 @@ const Profile = () => {
     const [userId, setUserId] = useState(null);
     const [rejectedRequests, setRejectedRequests] = useState([]);
     const [rejectedList, setRejectedList] = useState([]);
-
+    const [accountAge, setAccountAge] = useState('');
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -29,11 +30,10 @@ const Profile = () => {
                         'Content-Type': 'application/json'
                     },
                 });
-    
+
                 if (!userProfileResponse.ok) {
-                    throw new Error('Failed to fetch user data');
+                    throw new Error('Failed to fetch user information');
                 }
-    
                 const userData = await userProfileResponse.json();
                 setUserId(userData);
                 setLoading(false);
@@ -55,62 +55,97 @@ const Profile = () => {
                 setFriends(filteredFriends);
     
                 // Fetch pending friend requests
-                const pendingRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
-                    headers: {
-                        'Authorization': token,
-                        'Content-Type': 'application/json'
-                    },
-                });
-    
-                if (!pendingRequestsResponse.ok) {
-                    throw new Error('Failed to fetch pending friend requests');
-                }
-    
-                const pendingRequestsData = await pendingRequestsResponse.json();
-                const requestsWithAge = pendingRequestsData.map(request => ({
-                    ...request,
-                    age: calculateAge(request.createdAt)
-                }));
-                setPendingRequests(requestsWithAge);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setError(error.message);
-                setLoading(false);
-            }
-        };
-    
-        fetchData();
-    }, [userId]);
-
-    const fetchRejectedList = async () => {
-        try {
-            const userId = localStorage.getItem('userId');
-            const token = localStorage.getItem('tokenKey');
-            
-            const response = await fetch(`http://localhost/api/users/${userId}/rejected-requests`, {
+                      // Fetch pending friend requests
+            const pendingRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
                 headers: {
                     'Authorization': token,
                     'Content-Type': 'application/json'
                 },
             });
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch rejected list');
+
+            if (!pendingRequestsResponse.ok) {
+                throw new Error('Failed to fetch pending friend requests');
             }
+
+            const pendingRequestsData = await pendingRequestsResponse.json();
+            const requestsWithUsernames = await Promise.all(pendingRequestsData.map(async (request) => {
+                const senderProfileResponse = await fetch(`http://localhost/api/users/${request.senderId}`, {
+                    headers: {
+                        'Authorization': token,
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                if (!senderProfileResponse.ok) {
+                    throw new Error(`Failed to fetch profile for sender ID ${request.senderId}`);
+                }
+
+                const senderProfile = await senderProfileResponse.json();
+                return {
+                    ...request,
+                    username: senderProfile.username,
+                    age: calculateRelativeTime(request.createdAt)
+                };
+            }));
+            setPendingRequests(requestsWithUsernames);
             
-            const data = await response.json();
+            // Fetch rejected friend requests
+            fetchRejectedList();
             
-            // Assuming the response data is an array of objects representing rejected friend requests
-            setRejectedList(data);
         } catch (error) {
-            console.error('Error fetching rejected list:', error.message);
-            // Handle error if needed
+            console.error('Error fetching data:', error);
+            setError(error.message);
+            setLoading(false);
         }
     };
-    
-    // Call the function to fetch rejected list
-    fetchRejectedList();
-    
+
+    fetchData();
+}, []);
+
+const fetchRejectedList = async () => {
+    try {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('tokenKey');
+        
+        const response = await fetch(`http://localhost/api/users/${userId}/rejected-requests`, {
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch rejected list');
+        }
+        
+        const data = await response.json();
+        
+        // Assuming the response data is an array of objects representing rejected friend requests
+        const rejectedListWithUsernames = await Promise.all(data.map(async (request) => {
+            const senderProfileResponse = await fetch(`http://localhost/api/users/${request.senderId}`, {
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!senderProfileResponse.ok) {
+                throw new Error(`Failed to fetch profile for sender ID ${request.senderId}`);
+            }
+
+            const senderProfile = await senderProfileResponse.json();
+            return {
+                ...request,
+                username: senderProfile.username,
+                age: calculateTimeAgo(request.createdAt)
+            };
+        }));
+        setRejectedList(rejectedListWithUsernames);
+    } catch (error) {
+        console.error('Error fetching rejected list:', error.message);
+        // Handle error if needed
+    }
+};
     const handleSendFriendRequest = async (friendId) => {
         try {
             console.log("Sending friend request to friendId:", friendId);
@@ -222,27 +257,51 @@ const Profile = () => {
     const handleCloseNotification = () => {
         setNotificationOpen(false);
     };
-    
-    const calculateAge = (createdAt) => {
-        const requestDate = new Date(createdAt); // Convert createdAt timestamp to Date object
-        const currentDate = new Date(); // Get the current date
-        const timeDifference = currentDate - requestDate; // Calculate the time difference in milliseconds
-    
-        // Convert milliseconds to seconds, minutes, hours, and days
+    //for the pending friend requests
+    const calculateRelativeTime = (createdAt) => {
+        const currentDate = new Date();
+        const requestDate = new Date(createdAt);
+        const timeDifference = currentDate - requestDate;
         const seconds = Math.floor(timeDifference / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
-    
-        // Determine the appropriate time unit to display
-        if (days > 0) {
-            return `${days} day${days > 1 ? 's' : ''} ago`;
+        const weeks = Math.floor(days / 7);
+
+        if (weeks > 0) {
+            return `${weeks}w ago`;
+        } else if (days > 0) {
+            return `${days}d ago`;
         } else if (hours > 0) {
-            return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            return `${hours}h ago`;
         } else if (minutes > 0) {
-            return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            return `${minutes}m ago`;
         } else {
-            return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+            return `${seconds}s ago`;
+        }
+    };
+    //for the rejected friends list
+    const calculateTimeAgo = (timestamp) => {
+        const now = new Date();
+        const date = new Date(timestamp);
+        const elapsed = now - date;
+
+        const seconds = Math.floor(elapsed / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        const weeks = Math.floor(days / 7);
+
+        if (weeks > 0) {
+            return `${weeks}w ago`;
+        } else if (days > 0) {
+            return `${days}d ago`;
+        } else if (hours > 0) {
+            return `${hours}h ago`;
+        } else if (minutes > 0) {
+            return `${minutes}m ago`;
+        } else {
+            return 'Just now';
         }
     };
     
@@ -272,23 +331,6 @@ const Profile = () => {
 
    return (
     <Box sx={{ padding: '20px' }}>
-      {/* Rejected List */}
-      <Paper elevation={3} sx={{
-                background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
-                color: '#000',
-                padding: '20px',
-                borderRadius: '5px',
-                marginBottom: '20px'
-            }}>
-                <Typography variant="h4" gutterBottom>Rejected Friend Requests</Typography>
-                <List>
-                    {rejectedList.map((request) => (
-                        <ListItem key={request.senderId}>
-                            <ListItemText primary={request.senderId} />
-                        </ListItem>
-                    ))}
-                </List>
-            </Paper>
         {/* User Information */}
         <Paper elevation={3} sx={{
             background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
@@ -306,7 +348,8 @@ const Profile = () => {
             <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userId?.answer}</Typography>
             <Typography variant="body1" gutterBottom><strong>Role:</strong> {userId?.role}</Typography>
             <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userId?.accountType}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {new Date(userId?.registrationTime).toLocaleString()}</Typography>
+            <Typography variant="h4" gutterBottom>Account Age</Typography>
+            <Typography variant="body1">{accountAge}</Typography>
             <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
         </Paper>
 
@@ -322,30 +365,14 @@ const Profile = () => {
             <List>
                 {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
                     <ListItem key={request.senderId}>
-                        <ListItemText primary={request.senderId} />
+                        <ListItemText primary={request.senderId} secondary={`${calculateRelativeTime(request.createdAt)}`}/>
                         <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
                         <Button variant="contained" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
                     </ListItem>
                 ))}
             </List>
         </Paper>
- {/* Rejected Friend Requests */}
- <Paper elevation={3} sx={{
-                background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
-                color: '#000',
-                padding: '20px',
-                borderRadius: '5px',
-                marginBottom: '20px'
-            }}>
-                <Typography variant="h4" gutterBottom>Rejected Friend Requests</Typography>
-                <List>
-                    {rejectedRequests.map((request) => (
-                        <ListItem key={request.senderId}>
-                            {/* Render rejected friend request information */}
-                        </ListItem>
-                    ))}
-                </List>
-            </Paper>
+
         {/* Friends */}
         <Paper elevation={3} sx={{
             background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
@@ -363,6 +390,25 @@ const Profile = () => {
                 ))}
             </List>
         </Paper>
+              {/* Rejected List */}
+              <Paper elevation={3} sx={{
+                background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
+                color: '#000',
+                padding: '20px',
+                borderRadius: '5px',
+                marginBottom: '20px'
+            }}>
+                <Typography variant="h4" gutterBottom>Rejected Friend Requests</Typography>
+                <List>
+                    {rejectedList.map((request) => (
+                        <ListItem key={request.senderId}>
+                            
+                            <ListItemText primary={`User ${request.senderId}`} />
+                            <Typography variant="body2" color="textSecondary">{calculateTimeAgo(request.createdAt)}</Typography>
+                        </ListItem>
+                    ))}
+                </List>
+            </Paper>
 
         {/* Search */}
         <TextField
