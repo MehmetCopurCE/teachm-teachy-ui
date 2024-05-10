@@ -66,7 +66,8 @@ function LoginSignup() {
                     localStorage.setItem("refreshKey", result.refreshToken);
                     localStorage.setItem("userId", result.userId);
                     localStorage.setItem("userName", username);
-                    console.log(result);    
+                    console.log(result); 
+                    console.log(accountPrivacy);   
                 })
                 .catch((err) => console.log(err))
         } catch (error) {
@@ -197,7 +198,7 @@ function LoginSignup() {
                 <div className="input">
                     <img src={answer_icon} alt="" />
                     <select value={accountPrivacy} onChange={handleAccountPrivacyChange}>
-                        <option value="PRIVATE">Privacy</option>
+                        <option value="PRIVATE">Prıvate</option>
                         <option value="PUBLIC">Public</option>
                     </select>
                 </div>

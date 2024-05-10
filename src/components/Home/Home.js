@@ -83,34 +83,32 @@ function Home() {
 
   return (
     <div className="home">
-      <Link to="/profile" className="profile-icon-link">
-        {/* Profile icon */}
-      </Link>
-      <h2>Posts</h2>
-      <p>Current version timestamp: {timestamp}</p>
-      <PostForm userId={userId} refreshPosts={refreshPosts}   />
-
-      {posts.map(post => (
-        <div key={post.id}>
-         <Post
-            postId={post.id}
-            title={post.title}
-            content={post.content}
-            postLikes={post.postLikes}
-            userId={post.userId}
-            userName={post.username}
-            createdAt={new Date(post.createdAt).toLocaleDateString('en-US', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-            originalPost={post.originPost}
-            refreshPosts={refreshPosts}
-          />
-        </div>
-      ))}
+      <div style={{ marginLeft: '20px', marginRight: '20px', marginBottom: '20px' }}>
+        <PostForm userId={userId} refreshPosts={refreshPosts} />
+      </div>
+      <div className="post-list">
+        {posts.map(post => (
+          <div key={post.id} style={{ marginBottom: '20px' }}>
+            <Post
+              postId={post.id}
+              title={post.title}
+              content={post.content}
+              postLikes={post.postLikes}
+              userId={post.userId}
+              userName={post.username}
+              createdAt={new Date(post.createdAt).toLocaleDateString('en-US', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+              originalPost={post.originPost}
+              refreshPosts={refreshPosts}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

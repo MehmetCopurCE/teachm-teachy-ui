@@ -24,24 +24,35 @@ import EditIcon from '@mui/icons-material/Edit';
 
 const CardWrapper = styled(Card)(({ theme }) => ({
   width: 800,
-  textAlign: "left",
   margin: 20,
+  borderRadius: 15,
+  boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+  backgroundColor: '#f9f9f9',
+}));
+
+const PostTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '1.5rem',
+  fontWeight: 'bold',
+  marginBottom: 10,
 }));
 
 const ContentWrapper = styled(CardContent)(({ theme }) => ({
   width: '100%',
+  paddingBottom: '16px !important',
 }));
 
+const CardActionsWrapper = styled(CardActions)(({ theme }) => ({
+  padding: '16px !important',
+}));
+
+const ReplyContainer = styled(Container)(({ theme }) => ({
+  marginTop: 20,
+}));
 const AvatarWrapper = styled(Avatar)(({ theme }) => ({
   background: 'orange',
-}));
-
-const ExpandIconButton = styled(IconButton)(({ theme }) => ({
-  transform: 'rotate(0deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
+  '& .MuiAvatar-root': {
+    borderBottom: 'none', // Alt çizgiyi kaldırma
+  }
 }));
 
 function Post(props) {
@@ -280,13 +291,13 @@ return (
   <div className="postContainer">
     <CardWrapper>
       <CardHeader
-        avatar={
-          <Link to={{ pathname: '/users/' + userId }}>
-            <AvatarWrapper sx={{ bgcolor: "orange", textDecoration: "none" }} aria-label="recipe">
-              {userName && userName.charAt(0).toUpperCase()}
-            </AvatarWrapper>
-          </Link>
-        }
+       avatar={
+        <Link to="/profile" className="profile-icon-link">
+          <AvatarWrapper sx={{ bgcolor: "orange", textDecoration: "none" }} aria-label="recipe">
+            {userName && userName.charAt(0).toUpperCase()}
+          </AvatarWrapper>
+        </Link>
+      }
         title={userName}
       />
 
@@ -314,10 +325,10 @@ return (
           </>
         ) : (
           <>
-            <Typography variant="h7" className="postTitle" >
-              <b>{title}</b>
-            </Typography>
-            <Typography variant="body2" >
+            <PostTitle>
+              {title}
+            </PostTitle>
+            <Typography variant="body2">
               {content}
             </Typography>
           </>
@@ -328,38 +339,33 @@ return (
           </Typography>
         </div>
       </ContentWrapper>
+
       {originalPost && (
-          <CardContent>
-            <Card>
-              <CardContent>
-                <Typography variant="h7" >
-                 <b>{originalPost.username}</b>
-                </Typography>
-                <Typography variant="body1">
-                  {originalPost.title}
-                </Typography>
-                <Typography variant="body2">
-                  {originalPost.content}
-                </Typography>
-                
-              </CardContent>
-            </Card>
-          </CardContent>
-        )}
-      <CardActions disableSpacing>
+        <CardContent>
+          <Card>
+            <CardContent>
+              <Typography variant="h7">
+                <b>{originalPost.username}</b>
+              </Typography>
+              <Typography variant="body1">
+                {originalPost.title}
+              </Typography>
+              <Typography variant="body2">
+                {originalPost.content}
+              </Typography>
+            </CardContent>
+          </Card>
+        </CardContent>
+      )}
+
+      <CardActionsWrapper disableSpacing>
         {userId !== parseInt(localStorage.userId, 10) && (
-          <IconButton
-            onClick={handleLike}
-            aria-label="add to favorites"
-          >
+          <IconButton onClick={handleLike} aria-label="add to favorites">
             <FavoriteIcon style={isLiked ? { color: "red" } : null} />
           </IconButton>
         )}
         {likeCounts} Likes
-        <IconButton
-          onClick={handleReplyClick}
-          aria-label="reply"
-        >
+        <IconButton onClick={handleReplyClick} aria-label="reply">
           <ReplyIcon />
         </IconButton>
         {userId === parseInt(localStorage.userId, 10) && (
@@ -383,39 +389,38 @@ return (
             </IconButton>
           </>
         )}
-        <ExpandIconButton
+        <IconButton
           onClick={handleExpandClick}
           aria-expanded={expanded}
           aria-label="show more"
         >
           <ExpandMoreIcon />
-        </ExpandIconButton>
-      </CardActions>
+        </IconButton>
+      </CardActionsWrapper>
 
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Container fixed>
+        <ReplyContainer fixed>
           <h3>Comments</h3>
-        
-           {isLoaded ? commentList.map(comment => (
-              <Comment
-                key={comment.id}
-                userId={comment.userId}
-                userName={comment.userName}
-                content={comment.content}
-                id={comment.id}
-                currentUser={localStorage.userId}
-                refreshComments={refreshComments}
-              />
-            )) : "Loading"}
+          {isLoaded ? commentList.map(comment => (
+            <Comment
+              key={comment.id}
+              userId={comment.userId}
+              userName={comment.username}
+              content={comment.content}
+              id={comment.id}
+              currentUser={localStorage.userId}
+              refreshComments={refreshComments}
+            />
+          )) : "Loading"}
           <CommentForm userId={localStorage.userId} userName={localStorage.userName} postId={postId} setCommentRefresh={refreshComments}></CommentForm>
-        </Container>
+        </ReplyContainer>
       </Collapse>
 
       {showReplyForm && (
-        <Container fixed>
+        <ReplyContainer fixed>
           <h3>Reply</h3>
           <ReplyForm onSubmit={handleReplySubmit} />
-        </Container>
+        </ReplyContainer>
       )}
     </CardWrapper>
   </div>
