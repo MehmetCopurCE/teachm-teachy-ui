@@ -69,39 +69,38 @@ setLoading(false); // Yükleme tamamlandı
                 setFriends(filteredFriends);
     
                 // Fetch pending friend requests
-                      // Fetch pending friend requests
-            const pendingRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
-                headers: {
-                    'Authorization': token,
-                    'Content-Type': 'application/json'
-                },
-            });
+                const pendingRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
+    headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+    },
+});
 
-            if (!pendingRequestsResponse.ok) {
-                throw new Error('Failed to fetch pending friend requests');
-            }
+if (!pendingRequestsResponse.ok) {
+    throw new Error('Failed to fetch pending friend requests');
+}
 
-            const pendingRequestsData = await pendingRequestsResponse.json();
-            const requestsWithUsernames = await Promise.all(pendingRequestsData.map(async (request) => {
-                const senderProfileResponse = await fetch(`http://localhost/api/users/${request.senderId}`, {
-                    headers: {
-                        'Authorization': token,
-                        'Content-Type': 'application/json'
-                    },
-                });
+const pendingRequestsData = await pendingRequestsResponse.json();
+const requestsWithUsernames = await Promise.all(pendingRequestsData.map(async (request) => {
+    const senderProfileResponse = await fetch(`http://localhost/api/users/${request.senderId}`, {
+        headers: {
+            'Authorization': token,
+            'Content-Type': 'application/json'
+        },
+    });
 
-                if (!senderProfileResponse.ok) {
-                    throw new Error(`Failed to fetch profile for sender ID ${request.senderId}`);
-                }
+    if (!senderProfileResponse.ok) {
+        throw new Error(`Failed to fetch profile for sender ID ${request.senderId}`);
+    }
 
-                const senderProfile = await senderProfileResponse.json();
-                return {
-                    ...request,
-                    username: senderProfile.username,
-                    age: calculateRelativeTime(request.createdAt)
-                };
-            }));
-            setPendingRequests(requestsWithUsernames);
+    const senderProfile = await senderProfileResponse.json();
+    return {
+        ...request,
+        username: senderProfile.userName, // Add the username to the request object
+        age: calculateRelativeTime(request.createdAt)
+    };
+}));
+setPendingRequests(requestsWithUsernames);
             
             // Fetch rejected friend requests
             fetchRejectedList();
@@ -114,6 +113,7 @@ setLoading(false); // Yükleme tamamlandı
     };
 
     fetchData();
+    
 }, []);
 
 const fetchRejectedList = async () => {
@@ -378,11 +378,6 @@ const fetchRejectedList = async () => {
             <Typography variant="body1" gutterBottom><strong>Email:</strong> {userId?.email}</Typography>
             <Typography variant="body1" gutterBottom><strong>First Name:</strong> {userId?.firstName}</Typography>
             <Typography variant="body1" gutterBottom><strong>Last Name:</strong> {userId?.lastName}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Security Question:</strong> {userId?.question}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userId?.answer}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Role:</strong> {userId?.role}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {userId?.registrationTime}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userId?.accountType}</Typography>
             <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
         </Paper>
 
@@ -398,7 +393,7 @@ const fetchRejectedList = async () => {
             <List>
                 {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
                     <ListItem key={request.senderId}>
-                        <ListItemText primary={request.senderId} secondary={`${calculateRelativeTime(request.createdAt)}`}/>
+                        <ListItemText primary={request.senderName} secondary={`${calculateRelativeTime(request.createdAt)}`}/>
                         <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
                         <Button variant="contained" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
                     </ListItem>
@@ -436,7 +431,7 @@ const fetchRejectedList = async () => {
                     {rejectedList.map((request) => (
                         <ListItem key={request.senderId}>
                             
-                            <ListItemText primary={`User ${request.senderId}`} />
+                            <ListItemText primary={`${request.senderName}`} />
                             <Typography variant="body2" color="textSecondary">{calculateTimeAgo(request.createdAt)}</Typography>
                         </ListItem>
                     ))}
