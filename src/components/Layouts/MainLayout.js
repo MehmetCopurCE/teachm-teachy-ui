@@ -19,9 +19,7 @@ const MainLayout = () => {
           <Profile />
         </Grid>
         {/* Right panel for LoginBar component */}
-        <Grid item xs={12} md={6}>
-          <LoginBar />
-        </Grid>
+      
       </Grid>
     </Box>
   );

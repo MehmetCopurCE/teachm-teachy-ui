@@ -22,22 +22,36 @@ const Profile = () => {
                 const token = localStorage.getItem('tokenKey');
                 const userId = localStorage.getItem('userId');
                 setUserId(userId);
-    
+                const countPendingRequests = () => {
+                    return pendingRequests ? pendingRequests.length : 0;
+                };
                 // Fetch user profile
-                const userProfileResponse = await fetch(`http://localhost/api/users/${userId}`, {
-                    headers: {
-                        'Authorization': token,
-                        'Content-Type': 'application/json'
-                    },
-                });
+               // Kullanıcı bilgilerini almak için yapılan istek
+const userProfileResponse = await fetch(`http://localhost/api/users/${userId}`, {
+    headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+    },
+});
 
-                if (!userProfileResponse.ok) {
-                    throw new Error('Failed to fetch user information');
-                }
-                const userData = await userProfileResponse.json();
-                setUserId(userData);
-                setLoading(false);
-    
+if (!userProfileResponse.ok) {
+    throw new Error('Failed to fetch user information');
+}
+
+// Kullanıcı bilgilerini alın
+const userData = await userProfileResponse.json();
+
+// Kullanıcı hesabının oluşturulma tarihi
+const accountCreationDate = userData?.createdAt;
+
+// Hesap yaşı hesaplama fonksiyonunu kullanarak hesap yaşı
+const accountAge = calculateAccountAge(accountCreationDate);
+
+// Kullanıcı bilgilerini state'e set et
+setUserId(userData);
+setAccountAge(accountAge);
+setLoading(false); // Yükleme tamamlandı
+
                 // Fetch friends list
                 const friendsListResponse = await fetch(`http://localhost/api/users/${userId}/friends`, {
                     headers: {
@@ -257,6 +271,23 @@ const fetchRejectedList = async () => {
     const handleCloseNotification = () => {
         setNotificationOpen(false);
     };
+    const calculateAccountAge = (registrationTime) => {
+        const currentDate = new Date();
+        const registrationDate = new Date(registrationTime);
+        const elapsedMilliseconds = currentDate - registrationDate;
+    
+        const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+        const elapsedHours = Math.floor(elapsedMinutes / 60);
+        const elapsedDays = Math.floor(elapsedHours / 24);
+    
+        const years = Math.floor(elapsedDays / 365);
+        const months = Math.floor((elapsedDays % 365) / 30);
+        const days = Math.floor((elapsedDays % 365) % 30);
+    
+        return `${years} years, ${months} months, ${days} days`;
+    };
+    
     //for the pending friend requests
     const calculateRelativeTime = (createdAt) => {
         const currentDate = new Date();
@@ -280,6 +311,9 @@ const fetchRejectedList = async () => {
             return `${seconds}s ago`;
         }
     };
+    
+
+
     //for the rejected friends list
     const calculateTimeAgo = (timestamp) => {
         const now = new Date();
@@ -347,9 +381,8 @@ const fetchRejectedList = async () => {
             <Typography variant="body1" gutterBottom><strong>Security Question:</strong> {userId?.question}</Typography>
             <Typography variant="body1" gutterBottom><strong>Answer:</strong> {userId?.answer}</Typography>
             <Typography variant="body1" gutterBottom><strong>Role:</strong> {userId?.role}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Registration Time:</strong> {userId?.registrationTime}</Typography>
             <Typography variant="body1" gutterBottom><strong>Account Type:</strong> {userId?.accountType}</Typography>
-            <Typography variant="h4" gutterBottom>Account Age</Typography>
-            <Typography variant="body1">{accountAge}</Typography>
             <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
         </Paper>
 
