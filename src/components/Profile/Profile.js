@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, List, ListItem, ListItemText, TextField, Button, Grid, Paper, Snackbar } from '@mui/material';
-
+import ProfileCard from '../ProfileCard/ProfileCard.js';
+import SearchUsers from '../SearchUsers/SearchUsers.js';
 const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -17,43 +18,15 @@ const Profile = () => {
     const [accountAge, setAccountAge] = useState('');
     
     useEffect(() => {
+
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('tokenKey');
                 const userId = localStorage.getItem('userId');
                 setUserId(userId);
-                const countPendingRequests = () => {
-                    return pendingRequests ? pendingRequests.length : 0;
-                };
-                // Fetch user profile
-               // Kullanıcı bilgilerini almak için yapılan istek
-const userProfileResponse = await fetch(`http://localhost/api/users/${userId}`, {
-    headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-    },
-});
-
-if (!userProfileResponse.ok) {
-    throw new Error('Failed to fetch user information');
-}
-
-// Kullanıcı bilgilerini alın
-const userData = await userProfileResponse.json();
-
-// Kullanıcı hesabının oluşturulma tarihi
-const accountCreationDate = userData?.createdAt;
-
-// Hesap yaşı hesaplama fonksiyonunu kullanarak hesap yaşı
-const accountAge = calculateAccountAge(accountCreationDate);
-
-// Kullanıcı bilgilerini state'e set et
-setUserId(userData);
-setAccountAge(accountAge);
-setLoading(false); // Yükleme tamamlandı
-
-                // Fetch friends list
-                const friendsListResponse = await fetch(`http://localhost/api/users/${userId}/friends`, {
+            
+// Fetch friends list
+const friendsListResponse = await fetch(`http://localhost/api/users/${userId}/friends`, {
                     headers: {
                         'Authorization': token,
                         'Content-Type': 'application/json'
@@ -338,31 +311,7 @@ const fetchRejectedList = async () => {
             return 'Just now';
         }
     };
-    
-    const handleSearch = async () => {
-        try {
-            const response = await fetch(`http://localhost/api/users`, {
-                headers: {
-                    'Authorization': localStorage.getItem('tokenKey'),
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch user data for search');
-            }
-
-            const data = await response.json();
-
-            const searchResults = data.filter(user =>
-                user.username.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-
-            setSearchResults(searchResults);
-        } catch (error) {
-            console.error('Failed to fetch user data for search:', error);
-        }
-    };
-
+   
    return (
     <Box sx={{ padding: '20px' }}>
         {/* User Information */}
@@ -373,12 +322,8 @@ const fetchRejectedList = async () => {
             borderRadius: '5px',
             marginBottom: '20px'
         }}>
-            <Typography variant="h4" gutterBottom>User Information</Typography>
-            <Typography variant="body1" gutterBottom><strong>Name:</strong> {userId?.username}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Email:</strong> {userId?.email}</Typography>
-            <Typography variant="body1" gutterBottom><strong>First Name:</strong> {userId?.firstName}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Last Name:</strong> {userId?.lastName}</Typography>
-            <Typography variant="body1" gutterBottom><strong>User Statistics:</strong> {userId?.userStatistic}</Typography>
+            
+            <ProfileCard userId={userId} />  
         </Paper>
 
         {/* Pending Friend Requests */}
@@ -439,24 +384,7 @@ const fetchRejectedList = async () => {
             </Paper>
 
         {/* Search */}
-        <TextField
-            label="Search"
-            variant="outlined"
-            value={searchQuery}
-            onChange={(e) => {
-                setSearchQuery(e.target.value);
-                handleSearch();
-            }}
-        />
-        <Button variant="contained" onClick={handleSearch}>Search</Button>
-        <List>
-            {searchResults.map((result) => (
-                <ListItem key={result.id}>
-                    <ListItemText primary={result.username} />
-                    <Button variant="contained" onClick={() => handleSendFriendRequest(result.id)}>Send Friend Request</Button>
-                </ListItem>
-            ))}
-        </List>
+        <SearchUsers/> 
 
         {/* Notification Snackbar */}
         <Snackbar

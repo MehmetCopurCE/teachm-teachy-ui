@@ -7,6 +7,7 @@ import Profile from './components/Profile/Profile.js';
 import { ReactComponent as Logo } from './logo.svg';
 
 
+
 function App() {
   return (
     <div className="App" style={{ backgroundColor: "#f0f0f0", display: "flex" }}>
@@ -21,6 +22,7 @@ function App() {
           {/* Define routes */}
           <Route path="/" element={<Login />} />
           <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+        
           <Route path="/home" element={<MainLayout><Home /></MainLayout>} />
           {/* Define other routes */}
         </Routes>
