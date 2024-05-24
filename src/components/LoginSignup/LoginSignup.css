@@ -1,99 +1,115 @@
-.container {
+.container{
     display: flex;
     flex-direction: column;
     margin: auto;
     margin-top: 200px;
     width: 600px;
-    background: #fff;
+    background:#fff;
     padding-bottom: 30px;
 }
 
-.header {
+.header{
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 9px;
     width: 100%;
     margin-top: 30px;
-}
 
-.text {
-    color: #ff8c00; /* Orange color */
+}
+.text{
+    color: #3c009d;
     font-size: 48px;
     font-weight: 700;
+
 }
 
-.underline {
+.underline{
     width: 61px;
-    height: 6px;
-    background: #ff8c00; /* Orange color */
+    height:6px;
+    background: #3c009d;
     border-radius: 9px;
+
+
 }
 
-.inputs {
+.inputs{
     margin-top: 55x;
     display: flex;
     flex-direction: column;
     gap: 25x;
+
+
 }
 
-.input {
+.input{
     display: flex;
     align-items: center;
     margin: auto;
     width: 480px;
     height: 80px;
-    background: #ffdab9; /* Light orange background */
+    background: #eaeaea;
     border-radius: 6px;
 }
 
-.input img {
+.input img{
     margin: 0px 30px;
 }
 
-.input input {
+.input input{
     height: 50px;
     width: 400px;
     background: transparent;
     border: none;
     outline: none;
-    color: #ff4500; /* Dark orange text color */
+    color: #797979;
     font-size: 19px;
+
 }
 
-.forgot-password {
+
+.forgot-password{
     padding-left: 62px;
     margin-top: 27px;
-    color: #ff4500; /* Dark orange color */
+    color: #797979;
     font-size: 18px;
+
 }
 
-.forgot-password span {
-    color: #ff8c00; /* Orange color */
+.forgot-password span{
+    color: #4c00b4;
     cursor: pointer;
+
 }
 
-.submit-container {
+.submit-container{
     display: flex;
     gap: 30px;
     margin: 60px auto;
+
 }
 
-.submit {
+.submit{
     display: flex;
     justify-content: center;
     align-items: center;
     width: 220px;
     height: 59px;
     color: #fff;
-    background: #ff4500; /* Dark orange color */
+    background: #4c00b4;
     border-radius: 50px;
     font-size: 19px;
     font-weight: 700;
-    cursor: pointer;
+    cursor:pointer;
+
 }
 
-.gray {
-    background: #ffdab9; /* Light orange background */
+.gray{
+    background: #EAEAEA;
     color: #676767;
+
+
+
+    
+
 }

@@ -4,8 +4,10 @@ import MainLayout from './components/Layouts/MainLayout.js'; // Import MainLayou
 import Login from './components/LoginSignup/LoginSignup.js';
 import Home from './components/Home/Home.js';
 import Profile from './components/Profile/Profile.js';
+import PendingList from './components/FriendLists/PendingList.js';
+import UserCard from './components/UserCard/UserCard.js';
 import { ReactComponent as Logo } from './logo.svg';
-
+import FriendsList from './components/FriendLists/FriendsList.js';
 
 
 function App() {
@@ -21,9 +23,11 @@ function App() {
         <Routes>
           {/* Define routes */}
           <Route path="/" element={<Login />} />
-          <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
-        
-          <Route path="/home" element={<MainLayout><Home /></MainLayout>} />
+          <Route path="/profile" element={<Profile userId={3} />} />
+          <Route path="/" element={<PendingList />} />
+                <Route path="/profile/:userId" element={<UserCard />} />
+          <Route path="/home" element={<Home />} />
+          <Route path ="/friendslist" element={<FriendsList />} />
           {/* Define other routes */}
         </Routes>
       </BrowserRouter>

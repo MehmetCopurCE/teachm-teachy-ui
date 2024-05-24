@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Avatar } from '@mui/material';
-import './ProfileCard.css'; // Import the CSS file
+import { useParams } from 'react-router-dom';
+import './UserCard.css'; // Import the CSS file
 
-const ProfileCard = () => {
+const UserCard = () => {
+    const { userId } = useParams(); // Get userId from URL parameters
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userData, setUserData] = useState(null);
@@ -11,9 +13,7 @@ const ProfileCard = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('tokenKey');
-                const userId = localStorage.getItem('userId');
-              
-                // Fetch user profile data
+
                 const userProfileResponse = await fetch(`http://localhost/api/users/${userId}`, {
                     headers: {
                         'Authorization': token,
@@ -25,10 +25,9 @@ const ProfileCard = () => {
                     throw new Error('Failed to fetch user information');
                 }
 
-                // Get user data
                 const userData = await userProfileResponse.json();
                 setUserData(userData);
-                setLoading(false); // Set loading to false after data is fetched
+                setLoading(false);
             } catch (error) {
                 setError(error.message);
                 setLoading(false);
@@ -36,7 +35,7 @@ const ProfileCard = () => {
         };
 
         fetchData();
-    }, []); // Added dependency array to run effect only once after mount
+    }, [userId]); // Run effect whenever userId changes
 
     return (
         <Box className="profile-container">
@@ -65,4 +64,4 @@ const ProfileCard = () => {
     );
 };
 
-export default ProfileCard;
+export default UserCard;

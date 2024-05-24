@@ -68,7 +68,11 @@ function Post(props) {
 const setCommentRefresh = () => {
   setRefresh(true);
 }
-
+const handleAvatarClick = () => {
+  // Redirect to user profile page
+  // You can customize the path based on your route configuration
+  window.location.href = `/profile/${userId}`;
+};
 const handleReplySubmit = async (replyData) => {
   try {
     const response = await fetch("http://localhost/api/posts/repost", {
@@ -214,21 +218,23 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {checkLikes()},[])
-  return (
-    <div className="postContainer">
-      <CardWrapper>
-        <CardHeader
-          avatar={
-            <Link to={{ pathname: '/users/' + userId }}>
-              <AvatarWrapper sx={{ bgcolor: "orange", textDecoration:"none" }} aria-label="recipe">
-                {userName && userName.charAt(0).toUpperCase()}
-                
-              </AvatarWrapper>
-            </Link>
-          }
-          title={userName}
-        />
-
+return (
+  <div className="postContainer">
+    <CardWrapper>
+      <CardHeader
+        avatar={
+          <Link to={{ pathname: '/users/' + userId }}>
+            <AvatarWrapper 
+              sx={{ bgcolor: "orange" }} 
+              aria-label="recipe"
+              onClick={handleAvatarClick} // Add onClick event handler
+            >
+              {userName && userName.charAt(0).toUpperCase()}
+            </AvatarWrapper>
+          </Link>
+        }
+        title={userName}
+      />
         <ContentWrapper>
         <Typography variant="h7" className="postTitle" >
       <b>{title}</b>

@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, List, ListItem, ListItemText, Snackbar } from '@mui/material';
+// src/components/FriendsList/FriendsList.js
 
+import React, { useState, useEffect } from 'react';
+import { Paper, Snackbar } from '@mui/material';
+import './FriendsList.css'; // Import the CSS file
 
 const FriendsList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [friends, setFriends] = useState([]);
     const [notificationMessage, setNotificationMessage] = useState('');
-    const [notificationType, setNotificationType] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
 
     useEffect(() => {
@@ -39,7 +40,6 @@ const FriendsList = () => {
                 console.error('Error fetching friend list:', error.message);
                 setError(error.message);
                 setNotificationMessage(error.message);
-                setNotificationType('error');
                 setNotificationOpen(true);
                 setLoading(false);
             }
@@ -56,21 +56,32 @@ const FriendsList = () => {
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <Paper elevation={3} sx={{
-            background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
-            color: '#000',
-            padding: '20px',
-            borderRadius: '5px',
-            marginBottom: '20px'
-        }}>
-            <Typography variant="h4" gutterBottom>Friends</Typography>
-            <List>
+        <Paper className="friends-list" elevation={3}>
+            <h2 className="friends-title">Friends</h2> {/* Updated title */}
+            <ul className="friend-list">
                 {friends.map((friend) => (
-                    <ListItem key={friend.friendId}>
-                        <ListItemText primary={friend.friendUsername} />
-                    </ListItem>
+                    <li key={friend.friendId}>
+                        <div className="friend-card">
+                            <img 
+                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`} 
+                                alt={friend.friendUsername} 
+                                className="profile-photo-lg"
+                            />
+                            <div className="card-info">
+                                <h4 className="text-green">{friend.friendUsername}</h4>
+                                <p>Some info about the friend</p>
+                            </div>
+                        </div>
+                    </li>
                 ))}
-            </List>
+            </ul>
+            <Snackbar
+                open={notificationOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseNotification}
+                message={notificationMessage}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
         </Paper>
     );
 };
