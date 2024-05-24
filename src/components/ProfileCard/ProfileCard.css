@@ -1,0 +1,68 @@
+/* Profile Container */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #eee;
+}
+
+/* Profile Card */
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    gap: 20px;
+    width: 270px;
+    background: #FFFFFF;
+    border: 1px solid #EAEAEA;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+}
+
+/* Avatar Styling */
+.profile-avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+/* Username Styling */
+.profile-username {
+    width: 100%;
+    text-align: center;
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 21px;
+    display: flex;
+    justify-content: center;
+    letter-spacing: 0.05em;
+    color: #000000;
+}
+
+/* Divider Styling */
+.profile-divider {
+    width: 100%;
+    border: 1px solid #EAEAEA;
+}
+
+/* Profile Info */
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    color: #333;
+}
+
+.profile-info > * {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    color: #808080;
+}

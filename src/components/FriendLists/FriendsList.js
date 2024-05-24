@@ -63,7 +63,7 @@ const FriendsList = () => {
                     <li key={friend.friendId}>
                         <div className="friend-card">
                             <img 
-                                src={`https://via.placeholder.com/80`} 
+                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`} 
                                 alt={friend.friendUsername} 
                                 className="profile-photo-lg"
                             />

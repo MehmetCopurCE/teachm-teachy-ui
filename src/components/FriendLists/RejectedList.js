@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { List, ListItem, ListItemText, Paper, Typography } from '@mui/material';
+import { Paper, Snackbar, Button } from '@mui/material';
+import './RejectedList.css'; // Import the CSS file
 
 const RejectedList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rejectedList, setRejectedList] = useState([]);
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [notificationOpen, setNotificationOpen] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userId = localStorage.getItem('userId');
                 const token = localStorage.getItem('tokenKey');
+                const userId = localStorage.getItem('userId');
+
+                if (!userId || !token) {
+                    throw new Error('User ID or Token is missing');
+                }
 
                 const response = await fetch(`http://localhost/api/users/${userId}/rejected-requests`, {
                     headers: {
@@ -47,7 +54,10 @@ const RejectedList = () => {
                 setRejectedList(rejectedListWithUsernames);
                 setLoading(false);
             } catch (error) {
-                setError(error);
+                console.error('Error fetching rejected list:', error.message);
+                setError(error.message);
+                setNotificationMessage(error.message);
+                setNotificationOpen(true);
                 setLoading(false);
             }
         };
@@ -79,32 +89,76 @@ const RejectedList = () => {
         }
     };
 
+    const resendRequest = async (senderId) => {
+        try {
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('tokenKey');
+
+            const response = await fetch(`http://localhost/api/users/${userId}/resend-request`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ senderId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to resend friend request');
+            }
+
+            setNotificationMessage('Friend request resent! 🎉');
+            setNotificationOpen(true);
+        } catch (error) {
+            console.error('Error resending friend request:', error);
+            setNotificationMessage('Failed to resend friend request');
+            setNotificationOpen(true);
+        }
+    };
+
+    const handleCloseNotification = () => {
+        setNotificationOpen(false);
+    };
+
     if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error.message}</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
-        <RejectedListContent rejectedList={rejectedList} calculateTimeAgo={calculateTimeAgo} />
+        <Paper className="rejected-list" elevation={3}>
+            <h2 className="rejected-title">Rejected Friend Requests</h2>
+            <ul className="rejected-list-items">
+                {rejectedList.map((request) => (
+                    <li key={request.senderId} className="rejected-list-item">
+                        <div className="rejected-card">
+                            <img 
+                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`} 
+                                alt={request.senderName} 
+                                className="profile-photo-lg"
+                            />
+                            <div className="card-info">
+                                <h4 className="text-red">{request.senderName}</h4>
+                                <p className="time-ago">{calculateTimeAgo(request.createdAt)}</p>
+                            </div>
+                            <Button 
+                                variant="contained" 
+                                color="primary" 
+                                className="resend-button" 
+                                onClick={() => resendRequest(request.senderId)}>
+                                Oops! Resend Request
+                            </Button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+            <Snackbar
+                open={notificationOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseNotification}
+                message={notificationMessage}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
+        </Paper>
     );
 };
-
-const RejectedListContent = ({ rejectedList, calculateTimeAgo }) => (
-    <Paper elevation={3} sx={{
-        background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
-        color: '#000',
-        padding: '20px',
-        borderRadius: '5px',
-        marginBottom: '20px'
-    }}>
-        <Typography variant="h4" gutterBottom>Rejected Friend Requests</Typography>
-        <List>
-            {rejectedList.map((request) => (
-                <ListItem key={request.senderId}>
-                    <ListItemText primary={request.senderName} />
-                    <Typography variant="body2" color="textSecondary">{calculateTimeAgo(request.createdAt)}</Typography>
-                </ListItem>
-            ))}
-        </List>
-    </Paper>
-);
 
 export default RejectedList;

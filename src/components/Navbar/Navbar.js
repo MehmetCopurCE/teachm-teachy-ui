@@ -1,49 +1,85 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import AppBar from '@mui/material/AppBar';
+import React from 'react';
+import { useNavigate } from "react-router-dom";
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import Groups from '@mui/icons-material/Groups';
+import ExitToApp from '@mui/icons-material/ExitToApp';
+import { Typography } from '@mui/material';
+import { Roofing } from '@mui/icons-material';
 
 function Navbar() {
-    let userId = 5;
+    const navigate = useNavigate();
+
+    const Logout = () => {
+        window.localStorage.removeItem("tokenKey");
+        window.localStorage.removeItem("refreshKey");
+        window.localStorage.removeItem("userId");
+        window.localStorage.removeItem("userName");
+        navigate("/loginsignup");
+    };
+
+    const Profile = () => {
+        navigate("/profile");
+    };
+
+    const friendslist = () => {
+        navigate("/friendslist");
+    };
+
+    const Home = () => {
+        navigate("/home");
+    };
 
     return (
-        <div>
-            <AppBar position="static" sx={{ backgroundColor: 'orange' }}>
-                <Toolbar>
-                    <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" component="div" sx={{ color: 'white' }}>
-                            <Box textAlign="left">
-                            <li><Link to="/home">TeachYTeachU</Link></li>
-                            |
-                            |<li><Link to="/loginsignup">Login</Link></li>
-          
-                            </Box>
-                        </Typography>
-                    </Box>
-                    <Typography>
-                  
-                    <Link to="/profile" className="profile-icon-link">
-        
-        </Link>
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-        </div>
+<Drawer
+    variant="permanent"
+    sx={{
+        width: 240,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box', backgroundColor: '#4c00b4' },
+    }}
+>
+    <Box sx={{ overflow: 'auto' }}>
+        <List>
+            <ListItem button onClick={Home}>
+                <ListItemIcon>
+                    <Roofing fontSize="large" sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Home</Typography>} />
+            </ListItem>
+
+            <ListItem button onClick={Profile}>
+                <ListItemIcon>
+                    <AccountCircle fontSize="large" sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Profile</Typography>} />
+            </ListItem>
+            
+            <ListItem button onClick={friendslist}>
+                <ListItemIcon>
+                    <Groups fontSize="large" sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Friends</Typography>} />
+            </ListItem>
+
+            <ListItem button onClick={Logout}>
+                <ListItemIcon>
+                    <ExitToApp fontSize="large" sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Logout</Typography>} />
+            </ListItem>
+        </List>
+    </Box>
+</Drawer>
+
     );
 }
 
 export default Navbar;
+
+
