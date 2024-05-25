@@ -1,6 +1,6 @@
 /* Pending List Styling */
 .pending-list {
-    background: whitesmoke;
+    background: linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3));
     color: #000;
     padding: 20px;
     border-radius: 5px;

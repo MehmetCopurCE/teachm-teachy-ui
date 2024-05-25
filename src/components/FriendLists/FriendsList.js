@@ -1,5 +1,3 @@
-// src/components/FriendsList/FriendsList.js
-
 import React, { useState, useEffect } from 'react';
 import { Paper, Snackbar } from '@mui/material';
 import './FriendsList.css'; // Import the CSS file

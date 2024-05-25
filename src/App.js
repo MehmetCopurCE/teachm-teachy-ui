@@ -17,7 +17,8 @@ function App() {
       {/* Logo is an actual React component */}
       
       {/* added a placeholder logo for demo purposes.    */}
-      <Logo />
+      
+      
     </div>
       <BrowserRouter>
         <Routes>

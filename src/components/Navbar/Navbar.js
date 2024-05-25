@@ -20,7 +20,7 @@ function Navbar() {
         window.localStorage.removeItem("refreshKey");
         window.localStorage.removeItem("userId");
         window.localStorage.removeItem("userName");
-        navigate("/loginsignup");
+        window.location.href = "/"; 
     };
 
     const Profile = () => {
@@ -41,37 +41,37 @@ function Navbar() {
     sx={{
         width: 240,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box', backgroundColor: '#4c00b4' },
+        [`& .MuiDrawer-paper`]: { width: 60, boxSizing: 'border-box', backgroundColor: '#gray' },
     }}
 >
     <Box sx={{ overflow: 'auto' }}>
         <List>
             <ListItem button onClick={Home}>
                 <ListItemIcon>
-                    <Roofing fontSize="large" sx={{ color: 'white' }} />
+                    <Roofing fontSize="large" sx={{ color: '#gray' }} />
                 </ListItemIcon>
-                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Home</Typography>} />
+                
             </ListItem>
 
             <ListItem button onClick={Profile}>
                 <ListItemIcon>
-                    <AccountCircle fontSize="large" sx={{ color: 'white' }} />
+                    <AccountCircle fontSize="large" sx={{ color: '#gray' }} />
                 </ListItemIcon>
-                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Profile</Typography>} />
+               
             </ListItem>
             
             <ListItem button onClick={friendslist}>
                 <ListItemIcon>
-                    <Groups fontSize="large" sx={{ color: 'white' }} />
+                    <Groups fontSize="large" sx={{ color: '#gray' }} />
                 </ListItemIcon>
-                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Friends</Typography>} />
+               
             </ListItem>
 
             <ListItem button onClick={Logout}>
                 <ListItemIcon>
-                    <ExitToApp fontSize="large" sx={{ color: 'white' }} />
+                    <ExitToApp fontSize="large" sx={{ color: '#gray' }} />
                 </ListItemIcon>
-                <ListItemText primary={<Typography variant="h6" sx={{ color: 'white' }}>Logout</Typography>} />
+               
             </ListItem>
         </List>
     </Box>

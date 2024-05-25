@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { List, ListItem, ListItemText, Button, Paper, Typography, Snackbar } from '@mui/material';
+import { List, ListItem, Typography, Button, Paper, Snackbar, Avatar } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import './PendingList.css';
 
 const PendingList = ({ setFriends }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [notificationMessage, setNotificationMessage] = useState('');
-    const [notificationType, setNotificationType] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -22,7 +24,7 @@ const PendingList = ({ setFriends }) => {
                 const pendingRequestsResponse = await fetch(`http://localhost/api/users/${userId}/friend-requests`, {
                     headers: {
                         'Authorization': token,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                 });
 
@@ -31,27 +33,14 @@ const PendingList = ({ setFriends }) => {
                 }
 
                 const pendingRequestsData = await pendingRequestsResponse.json();
-                const requestsWithUsernames = await Promise.all(pendingRequestsData.map(async (request) => {
-                    const senderProfileResponse = await fetch(`http://localhost/api/users/${request.senderId}`, {
-                        headers: {
-                            'Authorization': token,
-                            'Content-Type': 'application/json'
-                        },
-                    });
 
-                    if (!senderProfileResponse.ok) {
-                        throw new Error(`Failed to fetch profile for sender ID ${request.senderId}`);
-                    }
-
-                    const senderProfile = await senderProfileResponse.json();
-                    return {
-                        ...request,
-                        username: senderProfile.userName,
-                        age: calculateRelativeTime(request.createdAt)
-                    };
+                const simplifiedRequests = pendingRequestsData.map(request => ({
+                    senderId: request.senderId,
+                    senderName: request.senderName,
+                    createdAt: request.createdAt,
                 }));
-                setPendingRequests(requestsWithUsernames);
 
+                setPendingRequests(simplifiedRequests);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -63,44 +52,18 @@ const PendingList = ({ setFriends }) => {
         fetchData();
     }, []);
 
-    const calculateRelativeTime = (createdAt) => {
-        const currentDate = new Date();
-        const requestDate = new Date(createdAt);
-        const timeDifference = currentDate - requestDate;
-        const seconds = Math.floor(timeDifference / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
-        const weeks = Math.floor(days / 7);
-
-        if (weeks > 0) {
-            return `${weeks}w ago`;
-        } else if (days > 0) {
-            return `${days}d ago`;
-        } else if (hours > 0) {
-            return `${hours}h ago`;
-        } else if (minutes > 0) {
-            return `${minutes}m ago`;
-        } else {
-            return `${seconds}s ago`;
-        }
-    };
-
     const handleAcceptFriendRequest = async (senderId) => {
         try {
-            console.log("Accepting friend request from friendId:", senderId);
             const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
-            console.log("Authorization token:", token);
 
             const response = await fetch(`http://localhost/api/users/${userId}/accept-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
             });
-            const responseData = await response.json();
 
             if (!response.ok) {
                 throw new Error('Failed to accept friend request');
@@ -108,14 +71,10 @@ const PendingList = ({ setFriends }) => {
 
             setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
 
-           
-
-            setNotificationType('success');
             setNotificationMessage('Friend request accepted successfully!');
             setNotificationOpen(true);
         } catch (error) {
             console.error('Failed to accept friend request:', error);
-            setNotificationType('error');
             setNotificationMessage('Failed to accept friend request');
             setNotificationOpen(true);
         }
@@ -123,19 +82,16 @@ const PendingList = ({ setFriends }) => {
 
     const handleRejectFriendRequest = async (senderId) => {
         try {
-            console.log("Rejecting friend request from friendId:", senderId);
             const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
-            console.log("Authorization token:", token);
 
             const response = await fetch(`http://localhost/api/users/${userId}/reject-friend-request?senderId=${senderId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
             });
-            const responseData = await response.json();
 
             if (!response.ok) {
                 throw new Error('Failed to reject friend request');
@@ -143,12 +99,10 @@ const PendingList = ({ setFriends }) => {
 
             setPendingRequests(prevRequests => prevRequests.filter(request => request.senderId !== senderId));
 
-            setNotificationType('success');
             setNotificationMessage('Friend request rejected successfully!');
             setNotificationOpen(true);
         } catch (error) {
             console.error('Failed to reject friend request:', error);
-            setNotificationType('error');
             setNotificationMessage('Failed to reject friend request');
             setNotificationOpen(true);
         }
@@ -158,24 +112,34 @@ const PendingList = ({ setFriends }) => {
         setNotificationOpen(false);
     };
 
+    const handleAvatarClick = (senderId) => {
+        navigate(`/profile/${senderId}`);
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <Paper elevation={3} sx={{
-            background: 'linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3))',
-            color: '#000',
-            padding: '20px',
-            borderRadius: '5px',
-            marginBottom: '20px'
-        }}>
-            <Typography variant="h4" gutterBottom>Pending Friend Requests</Typography>
-            <List>
+        <Paper className="pending-list">
+            <Typography className="pending-title" variant="h4" gutterBottom>Pending Friend Requests</Typography>
+            <List className="pending-list-items">
                 {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
-                    <ListItem key={request.senderId}>
-                        <ListItemText primary={request.senderName} secondary={`Requested ${request.age}`} />
-                        <Button variant="contained" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
-                        <Button variant="contained" color="secondary" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
+                    <ListItem key={request.senderId} className="pending-list-item">
+                        <div className="pending-card">
+                            <Avatar
+                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`}
+                                alt={request.senderName}
+                                className="profile-photo-lg"
+                                onClick={() => handleAvatarClick(request.senderId)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                            <div className="card-info">
+                                <Typography className="text-info" variant="h6">{request.senderName}</Typography>
+                                <Typography className="time-ago">{request.createdAt}</Typography>
+                            </div>
+                            <Button variant="contained" className="accept-button" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
+                            <Button variant="contained" color="secondary" className="reject-button" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
+                        </div>
                     </ListItem>
                 ))}
             </List>

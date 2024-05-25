@@ -17,28 +17,42 @@ import Container from '@mui/material/Container';
 import CommentForm from "../Comment/CommentForm";
 import ReplyForm from "./ReplyForm";
 import ReplyIcon from '@mui/icons-material/Reply';
-
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import EditIcon from '@mui/icons-material/Edit';
 
 const CardWrapper = styled(Card)(({ theme }) => ({
   width: 800,
-  textAlign: "left",
   margin: 20,
+  borderRadius: 15,
+  boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+  backgroundColor: '#f9f9f9',
+}));
+
+const PostTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '1.5rem',
+  fontWeight: 'bold',
+  marginBottom: 10,
 }));
 
 const ContentWrapper = styled(CardContent)(({ theme }) => ({
   width: '100%',
+  paddingBottom: '16px !important',
 }));
 
+const CardActionsWrapper = styled(CardActions)(({ theme }) => ({
+  padding: '16px !important',
+}));
+
+const ReplyContainer = styled(Container)(({ theme }) => ({
+  marginTop: 20,
+}));
 const AvatarWrapper = styled(Avatar)(({ theme }) => ({
   background: 'orange',
-}));
-
-const ExpandIconButton = styled(IconButton)(({ theme }) => ({
-  transform: 'rotate(0deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
+  '& .MuiAvatar-root': {
+    borderBottom: 'none', // Alt çizgiyi kaldırma
+  }
 }));
 
 function Post(props) {
@@ -53,6 +67,43 @@ function Post(props) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [commentList,setCommentList]=useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(title);
+  const [editedContent, setEditedContent] = useState(content);
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+    setEditedTitle(title);
+    setEditedContent(content);
+  };
+  const handleEditSubmit = async () => {
+    try {
+      const response = await fetch(`http://localhost/api/posts/${postId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem("tokenKey"),
+        },
+        body: JSON.stringify({
+          title: editedTitle,
+          content: editedContent
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update post');
+      }
+
+      setIsEditing(false);
+      refreshPosts();
+    } catch (error) {
+      setError(error);
+    }
+  };
  
   const handleReplyClick = () => {
     setShowReplyForm(true);
@@ -68,10 +119,25 @@ function Post(props) {
 const setCommentRefresh = () => {
   setRefresh(true);
 }
-const handleAvatarClick = () => {
-  // Redirect to user profile page
-  // You can customize the path based on your route configuration
-  window.location.href = `/profile/${userId}`;
+
+const deletePost = async () => {
+  try {
+    const response = await fetch(`http://localhost/api/posts/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: localStorage.getItem("tokenKey"),
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete post');
+    }
+
+    // Assuming successful deletion, you might want to do something here like refresh the posts
+    refreshPosts();
+  } catch (error) {
+    setError(error);
+  }
 };
 const handleReplySubmit = async (replyData) => {
   try {
@@ -201,17 +267,20 @@ const refreshComments = async () => {
       throw new Error('Failed to fetch comments');
     }
 
-    setIsLoaded(true);
-    const commentData=await response.json();
+    const commentData = await response.json();
     setCommentList(commentData);
+    setIsLoaded(true);
   } catch (error) {
+    console.error("Error fetching comments:", error);
     setError(error);
   }
 };
 
-useEffect(()=>{
+useEffect(() => {
+  checkLikes();
   refreshComments();
-})
+}, []);
+
 
 useEffect(() => {
   handleReplySubmit();
@@ -222,97 +291,139 @@ return (
   <div className="postContainer">
     <CardWrapper>
       <CardHeader
-        avatar={
-          <Link to={{ pathname: '/users/' + userId }}>
-            <AvatarWrapper 
-              sx={{ bgcolor: "orange" }} 
-              aria-label="recipe"
-              onClick={handleAvatarClick} // Add onClick event handler
-            >
-              {userName && userName.charAt(0).toUpperCase()}
-            </AvatarWrapper>
-          </Link>
-        }
+       avatar={
+        <Link to="/profile" className="profile-icon-link">
+          <AvatarWrapper sx={{ bgcolor: "orange", textDecoration: "none" }} aria-label="recipe">
+            {userName && userName.charAt(0).toUpperCase()}
+          </AvatarWrapper>
+        </Link>
+      }
         title={userName}
       />
-        <ContentWrapper>
-        <Typography variant="h7" className="postTitle" >
-      <b>{title}</b>
-    </Typography>
-          <Typography variant="body2" >
-            
-            {content}
-          </Typography>
-          <div style={{ borderTop: '1px solid #ccc', marginTop: 10, paddingTop: 10 }}>
-            <Typography variant="body2" color="text.secondary">
-              {createdAt}
+
+      <ContentWrapper>
+        {isEditing ? (
+          <>
+            <TextField
+              label="Title"
+              fullWidth
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              variant="outlined"
+              margin="normal"
+            />
+            <TextField
+              label="Content"
+              fullWidth
+              multiline
+              rows={4}
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              variant="outlined"
+              margin="normal"
+            />
+          </>
+        ) : (
+          <>
+            <PostTitle>
+              {title}
+            </PostTitle>
+            <Typography variant="body2">
+              {content}
             </Typography>
-          </div>
-        </ContentWrapper>
-        {originalPost && (
-          <ContentWrapper>
-            <Card>
-              <CardContent>
-                <Typography variant="h7">
-                  <b>{originalPost.title}</b>
-                </Typography>
-                <Typography variant="body2">
-                  {originalPost.content}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Reposted from: {originalPost.username}
-                </Typography>
-              </CardContent>
-            </Card>
-          </ContentWrapper>
+          </>
         )}
-        <CardActions disableSpacing>
-          <IconButton
-           onClick={handleLike}
-            aria-label="add to favorites"
-          >
+        <div style={{ borderTop: '1px solid #ccc', marginTop: 10, paddingTop: 10 }}>
+          <Typography variant="body2" color="text.secondary">
+            {createdAt}
+          </Typography>
+        </div>
+      </ContentWrapper>
+
+      {originalPost && (
+        <CardContent>
+          <Card>
+            <CardContent>
+              <Typography variant="h7">
+                <b>{originalPost.username}</b>
+              </Typography>
+              <Typography variant="body1">
+                {originalPost.title}
+              </Typography>
+              <Typography variant="body2">
+                {originalPost.content}
+              </Typography>
+            </CardContent>
+          </Card>
+        </CardContent>
+      )}
+
+      <CardActionsWrapper disableSpacing>
+        {userId !== parseInt(localStorage.userId, 10) && (
+          <IconButton onClick={handleLike} aria-label="add to favorites">
             <FavoriteIcon style={isLiked ? { color: "red" } : null} />
           </IconButton>
-          {likeCounts}
-          <IconButton
-            onClick={handleReplyClick}
-            aria-label="reply"
-          >
-            <ReplyIcon />
-          </IconButton>
-          <ExpandIconButton
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMoreIcon />
-          </ExpandIconButton>
-        </CardActions>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Container fixed>
-            <h3>Comments</h3>
-            {error ? "error" :
-              isLoaded ? commentList.map(comment => (
-                <Comment
-                  key={comment.id}
-                  author={comment.author}
-                  content={comment.content}
-                  createdAt={comment.createdAt}
-                />
-              )) : "Loading"}
-                <CommentForm userId = {localStorage.getItem("currentUser")} userName = {localStorage.getItem("userName")} postId = {postId} setCommentRefresh={setCommentRefresh}></CommentForm>
-           
-          </Container>
-        </Collapse>
-        {showReplyForm && (
-          <Container fixed>
-            <h3>Reply</h3>
-            <ReplyForm onSubmit={handleReplySubmit} />
-          </Container>
         )}
-      </CardWrapper>
-    </div>
-  );
-}
+        {likeCounts} Likes
+        <IconButton onClick={handleReplyClick} aria-label="reply">
+          <ReplyIcon />
+        </IconButton>
+        {userId === parseInt(localStorage.userId, 10) && (
+          <>
+            {isEditing ? (
+              <>
+                <Button onClick={handleEditSubmit} color="primary">
+                  Save
+                </Button>
+                <Button onClick={handleEditCancel} color="secondary">
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <IconButton onClick={handleEditClick} aria-label="edit">
+                <EditIcon />
+              </IconButton>
+            )}
+            <IconButton onClick={deletePost} aria-label="delete">
+              <DeleteOutlineIcon />
+            </IconButton>
+          </>
+        )}
+        <IconButton
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+      </CardActionsWrapper>
 
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <ReplyContainer fixed>
+          <h3>Comments</h3>
+          {isLoaded ? commentList.map(comment => (
+            <Comment
+              key={comment.id}
+              userId={comment.userId}
+              userName={comment.username}
+              content={comment.content}
+              id={comment.id}
+              currentUser={localStorage.userId}
+              refreshComments={refreshComments}
+            />
+          )) : "Loading"}
+          <CommentForm userId={localStorage.userId} userName={localStorage.userName} postId={postId} setCommentRefresh={refreshComments}></CommentForm>
+        </ReplyContainer>
+      </Collapse>
+
+      {showReplyForm && (
+        <ReplyContainer fixed>
+          <h3>Reply</h3>
+          <ReplyForm onSubmit={handleReplySubmit} />
+        </ReplyContainer>
+      )}
+    </CardWrapper>
+  </div>
+);
+}
 export default Post;
