@@ -6,6 +6,8 @@
     padding: 0;
     margin: -1px;
     list-style-type: none;
+    max-height: 400px; /* Set a max-height for the scroll area */
+    overflow-y: auto; /* Enable vertical scrolling */
   }
   
   .friend-list .friend-card {
