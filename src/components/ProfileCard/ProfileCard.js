@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Avatar } from '@mui/material';
+import { Box, Typography, Paper, Avatar, Snackbar } from '@mui/material';
 import './ProfileCard.css'; // Import the CSS file
 
-const ProfileCard = () => {
+const ProfileCard = ({ friendCount }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userData, setUserData] = useState(null);
+    const [notificationType, setNotificationType] = useState('');
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [notificationOpen, setNotificationOpen] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('tokenKey');
                 const userId = localStorage.getItem('userId');
-              
-                // Fetch user profile data
+
+                if (!userId || !token) {
+                    throw new Error('User ID or Token is missing');
+                }
+
                 const userProfileResponse = await fetch(`http://localhost/api/users/${userId}`, {
                     headers: {
                         'Authorization': token,
@@ -25,18 +31,25 @@ const ProfileCard = () => {
                     throw new Error('Failed to fetch user information');
                 }
 
-                // Get user data
                 const userData = await userProfileResponse.json();
                 setUserData(userData);
-                setLoading(false); // Set loading to false after data is fetched
+                setLoading(false);
             } catch (error) {
+                console.error('Error fetching user information:', error.message);
                 setError(error.message);
+                setNotificationMessage(error.message);
+                setNotificationType('error');
+                setNotificationOpen(true);
                 setLoading(false);
             }
         };
 
         fetchData();
-    }, []); // Added dependency array to run effect only once after mount
+    }, []);
+
+    const handleCloseNotification = () => {
+        setNotificationOpen(false);
+    };
 
     return (
         <Box className="profile-container">
@@ -57,10 +70,18 @@ const ProfileCard = () => {
                             <Typography variant="body1"><strong>First Name:</strong> {userData.firstName}</Typography>
                             <Typography variant="body1"><strong>Last Name:</strong> {userData.lastName}</Typography>
                             <Typography variant="body1"><strong>User Statistics:</strong> {userData.userStatistic}</Typography>
+                            <Typography variant="body1"><strong>Friend Count:</strong> {friendCount}</Typography>
                         </div>
                     </>
                 )}
             </Paper>
+            <Snackbar
+                open={notificationOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseNotification}
+                message={notificationMessage}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
         </Box>
     );
 };

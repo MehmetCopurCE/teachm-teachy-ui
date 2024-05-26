@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Snackbar } from '@mui/material';
-import UnfollowFriend from '../UserActions/Unfollow' ;// Import the UnfollowFriend component
+import UnfollowFriend from '../UserActions/Unfollow' // Import the UnfollowFriend component
 import './FriendsList.css'; // Import the CSS file
 
 const FriendsList = () => {

@@ -71,9 +71,11 @@ function LoginSignup() {
 
     return (
         <div className='container'>
-            <div className="glassy">
-                <div className="header">{action === "login" ? "We've Missed You!" : "Join Teach Community"}</div>
-                <div className="inputs">
+            <div className={`glassy ${action === "login" ? "login" : ""}`}>
+                <div className={`header ${action === "login" ? "login" : ""}`}>
+                {action === "login" ? "Welcome to TeachMTeachU! We are one piece missing without U! ❤" : "Join TeachMTeachU! Help Others, Help Yourself. "}
+                </div>
+                <div className={`inputs ${action === "login" ? "login" : ""}`}>
                     {action !== "login" && (
                         <>
                             <div className="input">
@@ -105,7 +107,7 @@ function LoginSignup() {
                             </div>
                         </>
                     )}
-                    <div className="input">
+                    <div className="input login">
                         <img src={user_icon} alt="Username" />
                         <input
                             type="text"
@@ -114,7 +116,7 @@ function LoginSignup() {
                             onChange={handleInputChange(setUsername)}
                         />
                     </div>
-                    <div className="input">
+                    <div className="input login">
                         <img src={password_icon} alt="Password" />
                         <input
                             type="password"
@@ -152,12 +154,18 @@ function LoginSignup() {
                             </div>
                         </>
                     )}
-                    <div className="submit" onClick={() => handleSubmit(action === "login" ? "login" : "register")}>
+                    <div
+                        className="submit"
+                        onClick={() => handleSubmit(action === "login" ? "login" : "register")}
+                    >
                         {action === "login" ? "Login" : "Register"}
                     </div>
-                    <div className="forgot-password" onClick={() => setAction(action === "login" ? "register" : "login")}>
-                        {action === "login" ? "Don't have an account? Register" : "Already have an account? Login"}
-                    </div>
+                </div>
+                <div
+                    className="forgot-password"
+                    onClick={() => setAction(action === "login" ? "register" : "login")}
+                >
+                    {action === "login" ? "Don't have an account? Register" : "Already have an account? Login"}
                 </div>
             </div>
         </div>
