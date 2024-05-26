@@ -6,6 +6,7 @@ const RejectedList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rejectedList, setRejectedList] = useState([]);
+    const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
 
@@ -89,29 +90,33 @@ const RejectedList = () => {
         }
     };
 
-    const resendRequest = async (senderId) => {
+    const resendRequest = async (friendId) => {
         try {
             const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
 
-            const response = await fetch(`http://localhost/api/users/${userId}/resend-request`, {
+            const response = await fetch(`http://localhost/api/users/${userId}/send-friend-request?friendId=${friendId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ senderId })
             });
 
+            const responseData = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to resend friend request');
+                throw new Error(responseData.message || 'Failed to resend friend request');
             }
 
-            setNotificationMessage('Friend request resent! 🎉');
+            console.log('Friend request resent successfully!');
+            setNotificationType('success');
+            setNotificationMessage('Friend request resent successfully!');
             setNotificationOpen(true);
         } catch (error) {
-            console.error('Error resending friend request:', error);
-            setNotificationMessage('Failed to resend friend request');
+            console.error('Failed to resend friend request:', error);
+            setNotificationType('error');
+            setNotificationMessage(error.message || 'Failed to resend friend request');
             setNotificationOpen(true);
         }
     };
