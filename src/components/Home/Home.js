@@ -4,7 +4,7 @@ import Avatar from '@mui/material/Avatar';
 import Post from "../Post/Post";
 import PostForm from "../Post/PostForm";
 import Navbar from "../Navbar/Navbar";
-import Profile from "../Profile/Profile"; // Profil sayfasını içe aktar
+import banner from '../Assets/banner.png';
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -84,7 +84,11 @@ function Home() {
   
 
   return (
+
+
     <div className="home">
+    <img src={banner} alt="Banner" className="banner-image" />     
+
       <div style={{ display: 'flex' }}> {/* Ana bileşenlerin yan yana yerleştirilmesi */}
         <div style={{ flex: '1', marginRight: '20px' }}> {/* Postların bulunduğu bölüm */}
           <div style={{ marginLeft: '20px', marginBottom: '20px' }}>
@@ -115,9 +119,7 @@ function Home() {
             ))}
           </div>
         </div>
-        <div style={{ flex: '1' }}> {/* Profil sayfasının bulunduğu bölüm */}
-          <Profile /> {/* Profil bileşenini burada göster */}
-        </div>
+        
       </div>
     </div>
   );

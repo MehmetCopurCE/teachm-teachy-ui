@@ -1,0 +1,54 @@
+/* Container for the user profile */
+.profile-container {
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    min-height: 100vh; /* Full viewport height */
+    background-color: #f0f2f5; /* Light grey background */
+}
+
+/* Card styling for the user profile */
+.profile-card {
+    padding: 20px; /* Space inside the card */
+    max-width: 500px; /* Maximum width of the card */
+    width: 100%; /* Full width */
+    text-align: center; /* Center-align text */
+}
+
+/* Avatar styling */
+.profile-avatar {
+    width: 100px; /* Width of the avatar */
+    height: 100px; /* Height of the avatar */
+    margin: 0 auto 10px; /* Center avatar and add space below */
+}
+
+/* Username styling */
+.profile-username {
+    font-weight: bold; /* Bold font */
+    color: #333; /* Dark grey text */
+}
+
+/* Divider styling */
+.profile-divider {
+    width: 80%; /* 80% of the card's width */
+    height: 1px; /* Thin line */
+    background-color: #ddd; /* Light grey line */
+    margin: 20px 0; /* Space above and below */
+}
+
+/* Information section styling */
+.profile-info {
+    text-align: left; /* Left-align text */
+}
+
+/* Individual information item styling */
+.profile-info > .MuiTypography-body1 {
+    font-size: 1rem; /* Standard font size */
+    color: #555; /* Medium grey text */
+    margin-bottom: 10px; /* Space below each item */
+}
+
+/* Strong text styling */
+.profile-info > .MuiTypography-body1 > strong {
+    color: #333; /* Darker grey for strong text */
+}
