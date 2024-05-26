@@ -114,6 +114,8 @@ function Home() {
                   })}
                   originalPost={post.originPost}
                   refreshPosts={refreshPosts}
+                  repostTitle={post.repostTitle}
+                  repostContent={post.repostContent}
                 />
               </div>
             ))}
