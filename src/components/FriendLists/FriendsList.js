@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Snackbar } from '@mui/material';
+import UnfollowFriend from '../UserActions/Unfollow' ;// Import the UnfollowFriend component
 import './FriendsList.css'; // Import the CSS file
 
 const FriendsList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [friends, setFriends] = useState([]);
+    const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
 
@@ -50,12 +52,16 @@ const FriendsList = () => {
         setNotificationOpen(false);
     };
 
+    const removeFriendFromList = (friendId) => {
+        setFriends(prevFriends => prevFriends.filter(friend => friend.friendId !== friendId));
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
     return (
         <Paper className="friends-list" elevation={3}>
-            <h2 className="friends-title">Friends</h2> {/* Updated title */}
+            <h2 className="friends-title">Friends</h2>
             <ul className="friend-list">
                 {friends.map((friend) => (
                     <li key={friend.friendId}>
@@ -68,6 +74,13 @@ const FriendsList = () => {
                             <div className="card-info">
                                 <h4 className="text-green">{friend.friendUsername}</h4>
                                 <p>Some info about the friend</p>
+                                <UnfollowFriend
+                                    friendId={friend.friendId}
+                                    removeFriendFromList={removeFriendFromList}
+                                    setNotificationType={setNotificationType}
+                                    setNotificationMessage={setNotificationMessage}
+                                    setNotificationOpen={setNotificationOpen}
+                                />
                             </div>
                         </div>
                     </li>
