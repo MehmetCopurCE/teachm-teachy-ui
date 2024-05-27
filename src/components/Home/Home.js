@@ -4,7 +4,8 @@ import Avatar from '@mui/material/Avatar';
 import Post from "../Post/Post";
 import PostForm from "../Post/PostForm";
 import Navbar from "../Navbar/Navbar";
-import banner from '../Assets/banner.png';
+import SearchUsers from "../SearchUsers/SearchUsers";
+
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -87,7 +88,7 @@ function Home() {
 
 
     <div className="home">
-    <img src={banner} alt="Banner" className="banner-image" />     
+    <SearchUsers/>  
 
       <div style={{ display: 'flex' }}> {/* Ana bileşenlerin yan yana yerleştirilmesi */}
         <div style={{ flex: '1', marginRight: '20px' }}> {/* Postların bulunduğu bölüm */}

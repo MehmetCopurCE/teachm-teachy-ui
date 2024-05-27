@@ -12,7 +12,8 @@ import FriendsList from './components/FriendLists/FriendsList.js';
 
 function App() {
   return (
-    <div className="App" style={{ backgroundColor: "#f0f0f0", display: "flex" }}>
+    <div id="root" style={{ backgroundColor: '#fff', minHeight: '100vh' }}>
+   
       <div>
       {/* Logo is an actual React component */}
       

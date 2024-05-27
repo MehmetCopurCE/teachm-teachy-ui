@@ -12,6 +12,7 @@ body {
 
 /* Main container styles */
 .App {
+  
   text-align: center;
   background-color: #f0f0f0; /* Background color */
   min-height: 100vh; /* Minimum height to fill the viewport */
@@ -25,6 +26,12 @@ body {
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+/* Reset body and html background color */
+body, html {
+  background-color: #fff; /* or any other desired color */
+  margin: 0;
+  padding: 0;
 }
 
 /* Profile icon container styles */

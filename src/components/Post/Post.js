@@ -290,16 +290,20 @@ useEffect(() => {checkLikes()},[])
 return (
   <div className="postContainer">
     <CardWrapper>
-      <CardHeader
-       avatar={
-        <Link to="/profile" className="profile-icon-link">
-          <AvatarWrapper sx={{ bgcolor: "orange", textDecoration: "none" }} aria-label="recipe">
-            {userName && userName.charAt(0).toUpperCase()}
-          </AvatarWrapper>
-        </Link>
-      }
-        title={userName}
-      />
+    <CardHeader
+  avatar={
+    <Link to="/profile" className="profile-icon-link">
+      <Avatar
+        src={postId?.avatarUrl} // Replace 'request?.avatarUrl' with the actual avatar URL
+        alt={userName} // Provide a meaningful alt text
+        sx={{ bgcolor: red[500] }} // Customize background color if needed
+      >
+        {userName && userName.charAt(0).toUpperCase()}
+      </Avatar>
+    </Link>
+  }
+  title={userName}
+/>
 
       <ContentWrapper>
         {isEditing ? (
