@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Avatar, Snackbar } from '@mui/material';
-import './ProfileCard.css';
+import './ProfileCard.css'; // Import the CSS file
 
 const ProfileCard = () => {
     const [loading, setLoading] = useState(true);
@@ -70,33 +70,28 @@ const ProfileCard = () => {
     };
 
     return (
-        <Box className="wrapper">
-            <Paper className="user-card" elevation={3}>
-                <div className="user-card-img">
-                    <Avatar
-                        src={userData?.avatarUrl}//it works!!!!!!! 
-                        alt={userData?.username}
-                        className="profile-avatar"
-                    />
-                </div>
-                <div className="user-card-info">
-                    <Typography variant="h2">{userData?.username}</Typography>
-                    <Typography variant="body1">
-                        <span>Name:</span> {userData?.firstName}
-                    </Typography>
-                    <Typography variant="body1">
-                        <span>Surname:</span> {userData?.lastName}
-                    </Typography>
-                    <Typography variant="body1">
-                        <span>E-mail:</span> {userData?.email}
-                    </Typography>
-                    <Typography variant="body1">
-                        <span>User Statistics:</span> {userData?.userStatistic}
-                    </Typography>
-                    <Typography variant="body1">
-                        <strong>{friendCount}</strong> Friends
-                    </Typography>
-                </div>
+        <Box className="profile-container">
+            <Paper className="profile-card" elevation={3}>
+                {loading && <div>Loading...</div>}
+                {error && <div>Error: {error}</div>}
+                {userData && (
+                    <>
+                        <Avatar
+                            src={userData?.avatarUrl}
+                            alt={userData.username}
+                            className="profile-avatar"
+                        />
+                        <Typography variant="h5" className="profile-username">{userData.username}</Typography>
+                        <div className="profile-divider" />
+                        <div className="profile-info">
+                            <Typography variant="body1"><strong>Email:</strong> {userData.email}</Typography>
+                            <Typography variant="body1"><strong>First Name:</strong> {userData.firstName}</Typography>
+                            <Typography variant="body1"><strong>Last Name:</strong> {userData.lastName}</Typography>
+                            <Typography variant="body1"><strong>User Statistics:</strong> {userData.userStatistic}</Typography>
+                            <Typography variant="body1"><strong>{friendCount}</strong> Friends</Typography>
+                        </div>
+                    </>
+                )}
             </Paper>
             <Snackbar
                 open={notificationOpen}

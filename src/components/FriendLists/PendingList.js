@@ -34,13 +34,23 @@ const PendingList = ({ setFriends }) => {
 
                 const pendingRequestsData = await pendingRequestsResponse.json();
 
-                const simplifiedRequests = pendingRequestsData.map(request => ({
-                    senderId: request.senderId,
-                    senderName: request.senderName,
-                    createdAt: request.createdAt,
-                }));
+                // Fetch user details for each request to get avatar URL
+                const pendingDetailsPromises = pendingRequestsData.map(request =>
+                    fetch(`http://localhost/api/users/${request.senderId}`, {
+                        headers: {
+                            'Authorization': token,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => ({
+                            ...request,
+                            avatarUrl: data.avatarUrl,
+                        }))
+                );
 
-                setPendingRequests(simplifiedRequests);
+                const pendingDetails = await Promise.all(pendingDetailsPromises);
+                setPendingRequests(pendingDetails);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -127,7 +137,7 @@ const PendingList = ({ setFriends }) => {
                     <ListItem key={request.senderId} className="pending-list-item">
                         <div className="pending-card">
                             <Avatar
-                                 src={request.avatarUrl}
+                                src={request.avatarUrl}
                                 alt={request.senderName}
                                 className="profile-photo-lg"
                                 onClick={() => handleAvatarClick(request.senderId)}

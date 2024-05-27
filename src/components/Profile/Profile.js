@@ -172,7 +172,7 @@ const Profile = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div>No comments found</div>
+                                <div>You have no comments yet...</div>
                             )}
                         </div>
                     )}
@@ -190,7 +190,7 @@ const Profile = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div>No posts found</div>
+                                <div>You have no posts yet...</div>
                             )}
                         </div>
                     )}

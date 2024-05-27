@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Paper, Snackbar } from '@mui/material';
+import { Paper, Snackbar, Avatar } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import UnfollowFriend from '../UserActions/Unfollow';
 import './FriendsList.css';
 
@@ -11,6 +12,7 @@ const FriendsList = () => {
     const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
         const fetchFriendsData = async () => {
@@ -35,7 +37,24 @@ const FriendsList = () => {
 
                 const friendsData = await response.json();
                 const filteredFriends = friendsData.filter(friend => friend.friendId !== parseInt(userId));
-                setFriends(filteredFriends);
+
+                // Fetch user details for each friend to get avatar URL
+                const friendsDetailsPromises = filteredFriends.map(friend =>
+                    fetch(`http://localhost/api/users/${friend.friendId}`, {
+                        headers: {
+                            'Authorization': token,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => ({
+                            ...friend,
+                            avatarUrl: data.avatarUrl
+                        }))
+                );
+
+                const friendsDetails = await Promise.all(friendsDetailsPromises);
+                setFriends(friendsDetails);
                 setLoading(false);
 
                 // Fetch friends count for each friend
@@ -82,6 +101,10 @@ const FriendsList = () => {
         });
     };
 
+    const handleAvatarClick = (friendId) => {
+        navigate(`/profile/${friendId}`); // Navigate to the user profile page
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
@@ -91,10 +114,12 @@ const FriendsList = () => {
             <ul className="friend-list">
                 {friends.map((friend) => (
                     <li key={friend.friendId} className="friend-card">
-                        <img 
-                          src={friend.avatarUrl} 
-                          alt={friend.friendUsername} 
-                          className="profile-photo-lg"
+                        <Avatar
+                            src={friend.avatarUrl}
+                            alt={friend.friendUsername}
+                            className="profile-photo-lg"
+                            onClick={() => handleAvatarClick(friend.friendId)}
+                            style={{ cursor: 'pointer' }}
                         />
                         <div className="card-info">
                             <h4 className="text-green">{friend.friendUsername}</h4>

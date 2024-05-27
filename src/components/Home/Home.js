@@ -1,11 +1,9 @@
+// Home.js
 import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
-import Avatar from '@mui/material/Avatar';
+import Navbar from "../Navbar/Navbar";
 import Post from "../Post/Post";
 import PostForm from "../Post/PostForm";
-import Navbar from "../Navbar/Navbar";
 import SearchUsers from "../SearchUsers/SearchUsers";
-
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -31,8 +29,7 @@ function Home() {
         }
 
         const postData = await response.json();
-        const sortedPosts = postData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sıralama işlemi
-        
+        const sortedPosts = postData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); 
         setPosts(sortedPosts);
       } catch (error) {
         setError(error);
@@ -49,7 +46,7 @@ function Home() {
     const currentTimestamp = new Date().toLocaleString();
     setTimestamp(currentTimestamp);
   }, [token]);
-  
+
   const refreshPosts = async () => {
     try {
       const response = await fetch("http://localhost/api/posts", {
@@ -63,7 +60,7 @@ function Home() {
       }
 
       const postData = await response.json();
-      const sortedPosts = postData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sıralama işlemi
+      const sortedPosts = postData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); 
       setPosts(sortedPosts);
     } catch (error) {
       setError(error);
@@ -74,7 +71,6 @@ function Home() {
     refreshPosts();
   }, []);
 
-
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -82,18 +78,14 @@ function Home() {
   if (error) {
     return <div>Error: {error.message}</div>;
   }
-  
 
   return (
-
-
     <div className="home">
-    <SearchUsers/>  
-
-      <div style={{ display: 'flex' }}> {/* Ana bileşenlerin yan yana yerleştirilmesi */}
-        <div style={{ flex: '1', marginRight: '20px' }}> {/* Postların bulunduğu bölüm */}
+      <Navbar />
+      <SearchUsers />  
+      <div style={{ display: 'flex' }}>
+        <div style={{ flex: '1', marginRight: '20px' }}>
           <div style={{ marginLeft: '20px', marginBottom: '20px' }}>
-            <Navbar/>
             <PostForm userId={userId} refreshPosts={refreshPosts} />
           </div>
           <div className="post-list">
@@ -120,7 +112,6 @@ function Home() {
             ))}
           </div>
         </div>
-        
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Paper, Snackbar, Button } from '@mui/material';
+import { Paper, Snackbar, Button, Avatar } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './RejectedList.css'; // Import the CSS file
 
 const RejectedList = () => {
@@ -9,6 +10,7 @@ const RejectedList = () => {
     const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,26 +35,24 @@ const RejectedList = () => {
 
                 const data = await response.json();
 
-                const rejectedListWithUsernames = await Promise.all(data.map(async (request) => {
-                    const senderProfileResponse = await fetch(`http://localhost/api/users/${request.senderId}`, {
+                // Fetch user details for each request to get avatar URL
+                const rejectedDetailsPromises = data.map(request =>
+                    fetch(`http://localhost/api/users/${request.senderId}`, {
                         headers: {
                             'Authorization': token,
                             'Content-Type': 'application/json'
                         },
-                    });
+                    })
+                        .then(response => response.json())
+                        .then(senderProfile => ({
+                            ...request,
+                            senderName: senderProfile.username,
+                            avatarUrl: senderProfile.avatarUrl,
+                        }))
+                );
 
-                    if (!senderProfileResponse.ok) {
-                        throw new Error(`Failed to fetch profile for sender ID ${request.senderId}`);
-                    }
-
-                    const senderProfile = await senderProfileResponse.json();
-                    return {
-                        ...request,
-                        senderName: senderProfile.username,
-                    };
-                }));
-
-                setRejectedList(rejectedListWithUsernames);
+                const rejectedDetails = await Promise.all(rejectedDetailsPromises);
+                setRejectedList(rejectedDetails);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching rejected list:', error.message);
@@ -132,6 +132,10 @@ const RejectedList = () => {
         setNotificationOpen(false);
     };
 
+    const handleAvatarClick = (senderId) => {
+        navigate(`/profile/${senderId}`); // Navigate to the user profile page
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
@@ -142,10 +146,12 @@ const RejectedList = () => {
                 {rejectedList.map((request) => (
                     <li key={request.senderId} className="rejected-list-item">
                         <div className="rejected-card">
-                            <img 
-                                src={request?.avatarUrl}//it works!!!!!!! //acaba?? 
-                                alt={request.senderName} 
+                            <Avatar
+                                src={request.avatarUrl}
+                                alt={request.senderName}
                                 className="profile-photo-lg"
+                                onClick={() => handleAvatarClick(request.senderId)}
+                                style={{ cursor: 'pointer' }}
                             />
                             <div className="card-info">
                                 <h4 className="text-red">{request.senderName}</h4>
