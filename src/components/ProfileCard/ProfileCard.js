@@ -70,8 +70,10 @@ const ProfileCard = () => {
     };
 
     return (
+       
         <Box className="profile-container">
-            <Paper className="profile-card" elevation={3}>
+             
+              <Paper className="profile-card" elevation={3}>
                 {loading && <div>Loading...</div>}
                 {error && <div>Error: {error}</div>}
                 {userData && (
@@ -82,13 +84,15 @@ const ProfileCard = () => {
                             className="profile-avatar"
                         />
                         <Typography variant="h5" className="profile-username">{userData.username}</Typography>
+                        <Typography variant="body1"><strong>{friendCount}</strong> Friends</Typography>
                         <div className="profile-divider" />
                         <div className="profile-info">
-                            <Typography variant="body1"><strong>Email:</strong> {userData.email}</Typography>
-                            <Typography variant="body1"><strong>First Name:</strong> {userData.firstName}</Typography>
-                            <Typography variant="body1"><strong>Last Name:</strong> {userData.lastName}</Typography>
-                            <Typography variant="body1"><strong>User Statistics:</strong> {userData.userStatistic}</Typography>
-                            <Typography variant="body1"><strong>{friendCount}</strong> Friends</Typography>
+                        <Typography variant="body1"><strong>Name:</strong> {userData.firstName}</Typography>
+                            <Typography variant="body1"><strong>Surname:</strong> {userData.lastName}</Typography>
+                            <Typography variant="body1"><strong>E-mail:</strong> {userData.email}</Typography>
+                            
+                            <Typography variant="body1"><strong>Stats:</strong> {userData.userStatistic}</Typography>
+                            
                         </div>
                     </>
                 )}

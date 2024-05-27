@@ -110,7 +110,7 @@ const FriendsList = () => {
 
     return (
         <Paper className="friends-list" elevation={3}>
-            <h2 className="friends-title">Friends</h2>
+           <h2>Friends</h2>
             <ul className="friend-list">
                 {friends.map((friend) => (
                     <li key={friend.friendId} className="friend-card">

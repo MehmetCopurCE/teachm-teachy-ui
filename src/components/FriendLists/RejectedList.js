@@ -141,7 +141,7 @@ const RejectedList = () => {
 
     return (
         <Paper className="rejected-list" elevation={3}>
-            <h2 className="rejected-title">Rejected Friend Requests</h2>
+            
             <ul className="rejected-list-items">
                 {rejectedList.map((request) => (
                     <li key={request.senderId} className="rejected-list-item">
