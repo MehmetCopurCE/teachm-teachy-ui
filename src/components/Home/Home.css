@@ -3,6 +3,12 @@
   justify-content: space-between; /* Positions the sidebar and home content */
   padding: 30px 20px;
 }
+/* Reset body and html background color */
+body, html {
+  background-color: #fff; /* or any other desired color */
+  margin: 0;
+  padding: 0;
+}
 
 .sidebar {
   /* Sidebar styles */

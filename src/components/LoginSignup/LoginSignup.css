@@ -37,6 +37,7 @@ img {
   background: url('https://raw.githubusercontent.com/bedimcode/login-form/main/assets/img/login-bg.png') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
+  
   width: 100vw;
   display: flex;
   align-items: center;

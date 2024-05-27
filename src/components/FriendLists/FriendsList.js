@@ -92,9 +92,9 @@ const FriendsList = () => {
                 {friends.map((friend) => (
                     <li key={friend.friendId} className="friend-card">
                         <img 
-                            src={`https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436180.jpg?t=st=1716757233~exp=1716760833~hmac=4bfa8f8a96f4610dbb2dfab9866964687642659632c79903e43f6e33bf94d03f&w=740`} 
-                            alt={friend.friendUsername} 
-                            className="profile-photo-lg"
+                          src={friend.avatarUrl} 
+                          alt={friend.friendUsername} 
+                          className="profile-photo-lg"
                         />
                         <div className="card-info">
                             <h4 className="text-green">{friend.friendUsername}</h4>

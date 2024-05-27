@@ -196,20 +196,20 @@ const Profile = () => {
                     )}
                     {activeTab === 2 && (
                         <div className="friends">
-                            <h3>Friends</h3>
+                           
                             <FriendsList friends={friends} />
                             
                         </div>
                     )}
                     {activeTab === 3 && (
                         <div className="follow-requests">
-                            <h3>Follow Requests</h3>
+
                             <PendingList />
                         </div>
                     )}
                     {activeTab === 4 && (
                         <div className="rejected-requests">
-                            <h3>Rejected Requests</h3>
+                           
                             <RejectedList />
                         </div>
                     )}
