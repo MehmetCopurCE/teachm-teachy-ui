@@ -34,13 +34,23 @@ const PendingList = ({ setFriends }) => {
 
                 const pendingRequestsData = await pendingRequestsResponse.json();
 
-                const simplifiedRequests = pendingRequestsData.map(request => ({
-                    senderId: request.senderId,
-                    senderName: request.senderName,
-                    createdAt: request.createdAt,
-                }));
+                const pendingDetailsPromises = pendingRequestsData.map(request =>
+                    fetch(`http://localhost/api/users/${request.senderId}`, {
+                        headers: {
+                            'Authorization': token,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => ({
+                            ...request,
+                            avatarUrl: data.avatarUrl,
+                            timeElapsed: getTimeElapsed(request.createdAt) // Calculate time elapsed
+                        }))
+                );
 
-                setPendingRequests(simplifiedRequests);
+                const pendingDetails = await Promise.all(pendingDetailsPromises);
+                setPendingRequests(pendingDetails);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -51,6 +61,23 @@ const PendingList = ({ setFriends }) => {
 
         fetchData();
     }, []);
+
+    const getTimeElapsed = (createdAt) => {
+        const currentTime = new Date();
+        const createdTime = new Date(createdAt);
+        const timeDiff = Math.abs(currentTime - createdTime);
+        const minutes = Math.floor(timeDiff / (1000 * 60));
+        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+        if (days > 0) {
+            return `${days}d ago`;
+        } else if (hours > 0) {
+            return `${hours}h ago`;
+        } else {
+            return `${minutes}m ago`;
+        }
+    };
 
     const handleAcceptFriendRequest = async (senderId) => {
         try {
@@ -121,28 +148,33 @@ const PendingList = ({ setFriends }) => {
 
     return (
         <Paper className="pending-list">
-            <Typography className="pending-title" variant="h4" gutterBottom>Pending Friend Requests</Typography>
-            <List className="pending-list-items">
-                {Array.isArray(pendingRequests) && pendingRequests.map((request) => (
-                    <ListItem key={request.senderId} className="pending-list-item">
-                        <div className="pending-card">
-                            <Avatar
-                                 src={request.avatarUrl}
-                                alt={request.senderName}
-                                className="profile-photo-lg"
-                                onClick={() => handleAvatarClick(request.senderId)}
-                                style={{ cursor: 'pointer' }}
-                            />
-                            <div className="card-info">
-                                <Typography className="text-info" variant="h6">{request.senderName}</Typography>
-                                <Typography className="time-ago">{request.createdAt}</Typography>
+            {pendingRequests.length === 0 ? (
+                <Typography variant="h6" align="center" color="textSecondary" style={{ padding: '20px' }}>
+                    You have no follow requests yet...
+                </Typography>
+            ) : (
+                <List className="pending-list-items">
+                    {pendingRequests.map((request) => (
+                        <ListItem key={request.senderId} className="pending-list-item">
+                            <div className="pending-card">
+                                <Avatar
+                                    src={request.avatarUrl}
+                                    alt={request.senderName}
+                                    className="profile-photo-lg"
+                                    onClick={() => handleAvatarClick(request.senderId)}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                <div className="card-info">
+                                    <Typography className="text-info" variant="h6">{request.senderName}</Typography>
+                                    <Typography className="time-ago">{request.timeElapsed}</Typography> {/* Display time elapsed */}
+                                </div>
+                                <Button variant="contained" className="accept-button" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
+                                <Button variant="contained" color="secondary" className="reject-button" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
                             </div>
-                            <Button variant="contained" className="accept-button" onClick={() => handleAcceptFriendRequest(request.senderId)}>Accept</Button>
-                            <Button variant="contained" color="secondary" className="reject-button" onClick={() => handleRejectFriendRequest(request.senderId)}>Reject</Button>
-                        </div>
-                    </ListItem>
-                ))}
-            </List>
+                        </ListItem>
+                    ))}
+                </List>
+            )}
             <Snackbar
                 open={notificationOpen}
                 autoHideDuration={6000}

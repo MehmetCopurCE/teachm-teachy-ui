@@ -164,7 +164,7 @@ const Profile = () => {
                 <Paper className="content" elevation={3}>
                     {activeTab === 0 && (
                         <div className="comments">
-                            <h3>Comments</h3>
+                            
                             {comments.length > 0 ? (
                                 comments.map(comment => (
                                     <div key={comment.id} className="comment-item">
@@ -172,13 +172,13 @@ const Profile = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div>No comments found</div>
+                                <div>You have no comments yet...</div>
                             )}
                         </div>
                     )}
                     {activeTab === 1 && (
                         <div className="posts">
-                            <h3>Posts</h3>
+                           
                             {posts.length > 0 ? (
                                 posts.map(post => (
                                     <div key={post.id} className="post-item">
@@ -190,7 +190,7 @@ const Profile = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div>No posts found</div>
+                                <div>You have no posts yet...</div>
                             )}
                         </div>
                     )}
