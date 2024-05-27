@@ -127,7 +127,7 @@ const PendingList = ({ setFriends }) => {
                     <ListItem key={request.senderId} className="pending-list-item">
                         <div className="pending-card">
                             <Avatar
-                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`}
+                                 src={request.avatarUrl}
                                 alt={request.senderName}
                                 className="profile-photo-lg"
                                 onClick={() => handleAvatarClick(request.senderId)}

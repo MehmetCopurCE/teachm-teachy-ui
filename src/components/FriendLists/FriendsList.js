@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Snackbar } from '@mui/material';
-import './FriendsList.css'; // Import the CSS file
+import UnfollowFriend from '../UserActions/Unfollow';
+import './FriendsList.css';
 
 const FriendsList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [friends, setFriends] = useState([]);
+    const [friendsCount, setFriendsCount] = useState({});
+    const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchFriendsData = async () => {
             try {
                 const token = localStorage.getItem('tokenKey');
                 const userId = localStorage.getItem('userId');
@@ -34,6 +37,26 @@ const FriendsList = () => {
                 const filteredFriends = friendsData.filter(friend => friend.friendId !== parseInt(userId));
                 setFriends(filteredFriends);
                 setLoading(false);
+
+                // Fetch friends count for each friend
+                const friendsCountPromises = filteredFriends.map(friend =>
+                    fetch(`http://localhost/api/users/${friend.friendId}/friends`, {
+                        headers: {
+                            'Authorization': token,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => ({ friendId: friend.friendId, count: data.length }))
+                );
+
+                const friendsCountData = await Promise.all(friendsCountPromises);
+                const friendsCountMap = {};
+                friendsCountData.forEach(item => {
+                    friendsCountMap[item.friendId] = item.count;
+                });
+                setFriendsCount(friendsCountMap);
+
             } catch (error) {
                 console.error('Error fetching friend list:', error.message);
                 setError(error.message);
@@ -43,11 +66,20 @@ const FriendsList = () => {
             }
         };
 
-        fetchData();
+        fetchFriendsData();
     }, []);
 
     const handleCloseNotification = () => {
         setNotificationOpen(false);
+    };
+
+    const removeFriendFromList = (friendId) => {
+        setFriends(prevFriends => prevFriends.filter(friend => friend.friendId !== friendId));
+        setFriendsCount(prevFriendsCount => {
+            const newCount = { ...prevFriendsCount };
+            delete newCount[friendId];
+            return newCount;
+        });
     };
 
     if (loading) return <div>Loading...</div>;
@@ -55,20 +87,27 @@ const FriendsList = () => {
 
     return (
         <Paper className="friends-list" elevation={3}>
-            <h2 className="friends-title">Friends</h2> {/* Updated title */}
+            <h2 className="friends-title">Friends</h2>
             <ul className="friend-list">
                 {friends.map((friend) => (
-                    <li key={friend.friendId}>
-                        <div className="friend-card">
-                            <img 
-                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`} 
-                                alt={friend.friendUsername} 
-                                className="profile-photo-lg"
+                    <li key={friend.friendId} className="friend-card">
+                        <img 
+                          src={friend.avatarUrl} 
+                          alt={friend.friendUsername} 
+                          className="profile-photo-lg"
+                        />
+                        <div className="card-info">
+                            <h4 className="text-green">{friend.friendUsername}</h4>
+                            <p>{friend.firstName} {friend.lastName}</p>
+                            <p>{friendsCount[friend.friendId] ? `${friendsCount[friend.friendId]} Friends` : '0 Friends'}</p>
+
+                            <UnfollowFriend
+                                friendId={friend.friendId}
+                                removeFriendFromList={removeFriendFromList}
+                                setNotificationType={setNotificationType}
+                                setNotificationMessage={setNotificationMessage}
+                                setNotificationOpen={setNotificationOpen}
                             />
-                            <div className="card-info">
-                                <h4 className="text-green">{friend.friendUsername}</h4>
-                                <p>Some info about the friend</p>
-                            </div>
                         </div>
                     </li>
                 ))}

@@ -6,6 +6,7 @@ const RejectedList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rejectedList, setRejectedList] = useState([]);
+    const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
 
@@ -89,29 +90,40 @@ const RejectedList = () => {
         }
     };
 
-    const resendRequest = async (senderId) => {
+    const resendRequest = async (friendId) => {
         try {
             const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
 
-            const response = await fetch(`http://localhost/api/users/${userId}/resend-request`, {
+            const response = await fetch(`http://localhost/api/users/${userId}/send-friend-request?friendId=${friendId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ senderId })
             });
 
+            const responseData = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to resend friend request');
+                throw new Error(responseData.message || 'Failed to resend friend request');
             }
 
-            setNotificationMessage('Friend request resent! 🎉');
+            console.log('Friend request resent successfully!');
+            setNotificationType('success');
+            setNotificationMessage('Friend request resent successfully!');
             setNotificationOpen(true);
+
+            // Update rejectedList to mark the request as resent
+            setRejectedList(prevList =>
+                prevList.map(request =>
+                    request.senderId === friendId ? { ...request, isRequestSent: true } : request
+                )
+            );
         } catch (error) {
-            console.error('Error resending friend request:', error);
-            setNotificationMessage('Failed to resend friend request');
+            console.error('Failed to resend friend request:', error);
+            setNotificationType('error');
+            setNotificationMessage(error.message || 'Failed to resend friend request');
             setNotificationOpen(true);
         }
     };
@@ -131,7 +143,7 @@ const RejectedList = () => {
                     <li key={request.senderId} className="rejected-list-item">
                         <div className="rejected-card">
                             <img 
-                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`} 
+                                src={request?.avatarUrl}//it works!!!!!!! //acaba?? 
                                 alt={request.senderName} 
                                 className="profile-photo-lg"
                             />
@@ -139,13 +151,17 @@ const RejectedList = () => {
                                 <h4 className="text-red">{request.senderName}</h4>
                                 <p className="time-ago">{calculateTimeAgo(request.createdAt)}</p>
                             </div>
-                            <Button 
-                                variant="contained" 
-                                color="primary" 
-                                className="resend-button" 
-                                onClick={() => resendRequest(request.senderId)}>
-                                Oops! Resend Request
-                            </Button>
+                            {request.isRequestSent ? (
+                                <span className="follow-request-sent">Follow Request Sent ⏱</span>
+                            ) : (
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    className="resend-button" 
+                                    onClick={() => resendRequest(request.senderId)}>
+                                    Oops! Resend Request
+                                </Button>
+                            )}
                         </div>
                     </li>
                 ))}

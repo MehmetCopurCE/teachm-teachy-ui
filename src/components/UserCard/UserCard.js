@@ -45,7 +45,7 @@ const UserCard = () => {
                 {userData && (
                     <>
                         <Avatar
-                            src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`}
+                           src={userData?.avatarUrl}// userdatadan url geliyor sadece
                             alt={userData.username}
                             className="profile-avatar"
                         />

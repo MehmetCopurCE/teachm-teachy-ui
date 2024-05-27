@@ -4,7 +4,7 @@ body {
     font-size: 16px;
     color: #404040;
     font-family: Montserrat, sans-serif;
-    background-image: -webkit-gradient();
+    background-image: url("https://images.unsplash.com/photo-1612838320302-4b3b3b3b3b3b");
     background-position: center;
     background-attachment: fixed;
     margin: 0;
@@ -28,6 +28,110 @@ body {
     display: flex;
     justify-content: space-around;
     margin-bottom: 20px;
+}
+/* Profile.css */
+/* Profile.css */
+/* Profile.css */
+
+.profile-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.content {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.comment-item, .post-item {
+    margin-bottom: 20px;
+}
+
+.friend-item {
+    margin-bottom: 10px;
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px 0;
+}
+
+.collapsible-content {
+    padding: 0 10px;
+}
+
+.follow-requests, .rejected-requests {
+    margin-top: 20px;
+}
+
+.profile-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.content {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.comment-item, .post-item {
+    margin-bottom: 20px;
+}
+
+.friend-item {
+    margin-bottom: 10px;
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px 0;
+}
+
+.collapsible-content {
+    padding: 0 10px;
+}
+
+.follow-requests {
+    margin-top: 20px;
+}
+
+.profile-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.content {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.comment-item, .post-item {
+    margin-bottom: 20px;
+}
+
+.friend-item {
+    margin-bottom: 10px;
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px 0;
+}
+
+.collapsible-content {
+    padding: 0 10px;
 }
 
 .tab {

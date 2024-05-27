@@ -1,27 +1,35 @@
-/* SearchUsers.css */
-
+/* Container for the search bar */
 .search-container {
   width: 100%;
   padding: 0;
   margin: 0;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* Background and styling for the search paper */
 .search-paper {
   width: 100%;
   background: linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(70, 130, 180, 0.3));
   color: #000;
   padding: 20px;
-  border-radius: 0;
+  border-radius: 5px;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 
+/* Styles for the search input and button */
 .search-input {
-  width: 100%;
-  margin-bottom: 10px;
+  width: 80%;
+  margin-right: 10px;
+}
+
+.search-button {
+  height: 56px; /* Matches the height of the TextField */
 }
 
 .search-results {

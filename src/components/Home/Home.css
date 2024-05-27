@@ -3,6 +3,12 @@
   justify-content: space-between; /* Positions the sidebar and home content */
   padding: 30px 20px;
 }
+/* Reset body and html background color */
+body, html {
+  background-color: #fff; /* or any other desired color */
+  margin: 0;
+  padding: 0;
+}
 
 .sidebar {
   /* Sidebar styles */
@@ -11,6 +17,21 @@
   background: #FFFFFF;
   border: 1px solid #EAEAEA;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+}
+/* Add this to your CSS file */
+.search-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 50%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
   border-radius: 5px;
 }
 
