@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Snackbar } from '@mui/material';
-import UnfollowFriend from '../UserActions/Unfollow' // Import the UnfollowFriend component
+import UnfollowFriend from '../UserActions/Unfollow'; // Import the UnfollowFriend component
 import './FriendsList.css'; // Import the CSS file
 
 const FriendsList = () => {
@@ -63,17 +63,21 @@ const FriendsList = () => {
         <Paper className="friends-list" elevation={3}>
             <h2 className="friends-title">Friends</h2>
             <ul className="friend-list">
-                {friends.map((friend) => (
-                    <li key={friend.friendId}>
-                        <div className="friend-card">
+                {friends.map((friend) => {
+                    // Hesaplanan arkadaş sayısını alıyoruz
+                    const friendCount = friends.filter(f => f.friendId === friend.friendId).length;
+                    
+                    return (
+                        <li key={friend.friendId} className="friend-card">
                             <img 
-                                src={`https://img.freepik.com/free-psd/3d-illustration-person-with-glasses_23-2149436185.jpg?t=st=1716756513~exp=1716760113~hmac=73f26cb139c9b885e119a8cfc8246e2806ae518d60ebd994a8bfaefe205ef0e6&w=740`} 
+                                src={`https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436180.jpg?t=st=1716757233~exp=1716760833~hmac=4bfa8f8a96f4610dbb2dfab9866964687642659632c79903e43f6e33bf94d03f&w=740`} 
                                 alt={friend.friendUsername} 
                                 className="profile-photo-lg"
                             />
                             <div className="card-info">
                                 <h4 className="text-green">{friend.friendUsername}</h4>
-                                <p>Some info about the friend</p>
+                                <p>{friend.firstName} {friend.lastName}</p>
+                                <p>Friends: {friendCount}</p>
                                 <UnfollowFriend
                                     friendId={friend.friendId}
                                     removeFriendFromList={removeFriendFromList}
@@ -82,9 +86,9 @@ const FriendsList = () => {
                                     setNotificationOpen={setNotificationOpen}
                                 />
                             </div>
-                        </div>
-                    </li>
-                ))}
+                        </li>
+                    );
+                })}
             </ul>
             <Snackbar
                 open={notificationOpen}
