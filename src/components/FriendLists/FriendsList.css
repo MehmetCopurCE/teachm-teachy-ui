@@ -1,62 +1,113 @@
-/* ==================================================
-   Spice Up Your Friend List with Some Style!
-   ================================================== */
+body, html {
+  height: 100%;
+}
 
-   .friend-list {
-    padding: 0;
-    margin: 0;
-    list-style-type: none;
-    max-height: 400px; /* Set a max-height for the scroll area */
-    overflow-y: auto; /* Enable vertical scrolling */
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
+body {
+  background: #daa000;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 12%;
+}
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 40px;
+  width: 650px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 20px -5px rgba(0, 0, 0, 0.5);
+}
+
+.user-card:before {
+  content: '';
+  position: absolute;
+  height: 300%;
+  width: 173px;
+  background: #262626;
+  top: -60px;
+  left: -125px;
+  z-index: 0;
+  transform: rotate(17deg);
+}
+
+.user-card-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  margin-top: -60px;
+}
+
+.user-card-img img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 7px solid #fff;
+}
+
+.user-card-info {
+  text-align: center;
+  z-index: 2;
+}
+
+.user-card-info h2 {
+  font-size: 24px;
+  margin: 0;
+  margin-bottom: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+.user-card-info p {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.user-card-info p span {
+  font-weight: 700;
+  margin-right: 10px;
+}
+
+@media only screen and (min-width: 768px) {
+  .user-card {
+      flex-direction: row;
+      align-items: flex-start;
   }
-  
-  .friend-card {
-    border-radius: 4px;
-    border-bottom: 1px solid #f1f2f2;
-    overflow: hidden;
-    background: #fff;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  .user-card-img {
+      margin-right: 20px;
+      margin-bottom: 0;
   }
-  
-  .friend-card .card-info {
-    padding: 10px;
+  .user-card-info {
+      text-align: left;
   }
-  
-  .friend-card .card-info img.profile-photo-lg {
-    margin-top: -60px;
-    border: 7px solid #fff;
+}
+
+@media (max-width: 767px) {
+  .wrapper {
+      padding-top: 3%;
   }
-  
-  .profile-photo-lg {
-    height: 80px;
-    width: 80px;
-    border-radius: 50%;
+  .user-card:before {
+      width: 300%;
+      height: 200px;
+      transform: rotate(0);
   }
-  
-  .text-green {
-    color: purple;
+  .user-card-info h2 {
+      margin-top: 25px;
+      font-size: 35px;
   }
-  
-  /* Friends Title Styling - Let's Make it Pop! */
-  .friends-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 20px 0;  /* Adds space above and below the title */
-    text-align: center;
-    color: #333;
-    /* Add some shine to the title */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  .user-card-info p span {
+      display: block;
+      margin-bottom: 15px;
+      font-size: 18px;
   }
-  
-  /* Adjust Paper Padding for Extra Comfort */
-  .friends-list {
-    padding: 20px; /* Adds padding to the Paper component */
-  }
-  
+}

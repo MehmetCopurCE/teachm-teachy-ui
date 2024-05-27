@@ -89,11 +89,12 @@ const RejectedList = () => {
             return 'Just now';
         }
     };
+
     const resendRequest = async (friendId) => {
         try {
             const userId = localStorage.getItem('userId');
             const token = localStorage.getItem('tokenKey');
-    
+
             const response = await fetch(`http://localhost/api/users/${userId}/send-friend-request?friendId=${friendId}`, {
                 method: 'POST',
                 headers: {
@@ -101,18 +102,18 @@ const RejectedList = () => {
                     'Content-Type': 'application/json'
                 },
             });
-    
+
             const responseData = await response.json();
-    
+
             if (!response.ok) {
                 throw new Error(responseData.message || 'Failed to resend friend request');
             }
-    
+
             console.log('Friend request resent successfully!');
             setNotificationType('success');
             setNotificationMessage('Friend request resent successfully!');
             setNotificationOpen(true);
-    
+
             // Update rejectedList to mark the request as resent
             setRejectedList(prevList =>
                 prevList.map(request =>
@@ -126,7 +127,6 @@ const RejectedList = () => {
             setNotificationOpen(true);
         }
     };
-    
 
     const handleCloseNotification = () => {
         setNotificationOpen(false);
@@ -143,7 +143,7 @@ const RejectedList = () => {
                     <li key={request.senderId} className="rejected-list-item">
                         <div className="rejected-card">
                             <img 
-                                src={`https://icons.iconarchive.com/icons/aha-soft/free-large-boss/256/Devil-icon.png`} 
+                                src={request?.avatarUrl}//it works!!!!!!! //acaba?? 
                                 alt={request.senderName} 
                                 className="profile-photo-lg"
                             />

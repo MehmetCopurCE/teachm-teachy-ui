@@ -190,7 +190,7 @@ const SearchUsers = () => {
                         {searchResults.map((result) => (
                             <ListItem className="list-item" key={result.id}>
                                 <Avatar
-                                    src={`https://example.com/avatars/${result.id}.png`} // Replace with your avatar URL logic
+                                   src={result?.avatarUrl}// Replace with your avatar URL logic
                                     alt={result.username}
                                     className="avatar"
                                     onClick={() => handleAvatarClick(result.id)}

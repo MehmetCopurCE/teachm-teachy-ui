@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Snackbar } from '@mui/material';
-import UnfollowFriend from '../UserActions/Unfollow'; // Import the UnfollowFriend component
-import './FriendsList.css'; // Import the CSS file
+import UnfollowFriend from '../UserActions/Unfollow';
+import './FriendsList.css';
 
 const FriendsList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [friends, setFriends] = useState([]);
+    const [friendsCount, setFriendsCount] = useState({});
     const [notificationType, setNotificationType] = useState('');
     const [notificationMessage, setNotificationMessage] = useState('');
     const [notificationOpen, setNotificationOpen] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchFriendsData = async () => {
             try {
                 const token = localStorage.getItem('tokenKey');
                 const userId = localStorage.getItem('userId');
@@ -36,6 +37,26 @@ const FriendsList = () => {
                 const filteredFriends = friendsData.filter(friend => friend.friendId !== parseInt(userId));
                 setFriends(filteredFriends);
                 setLoading(false);
+
+                // Fetch friends count for each friend
+                const friendsCountPromises = filteredFriends.map(friend =>
+                    fetch(`http://localhost/api/users/${friend.friendId}/friends`, {
+                        headers: {
+                            'Authorization': token,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => ({ friendId: friend.friendId, count: data.length }))
+                );
+
+                const friendsCountData = await Promise.all(friendsCountPromises);
+                const friendsCountMap = {};
+                friendsCountData.forEach(item => {
+                    friendsCountMap[item.friendId] = item.count;
+                });
+                setFriendsCount(friendsCountMap);
+
             } catch (error) {
                 console.error('Error fetching friend list:', error.message);
                 setError(error.message);
@@ -45,7 +66,7 @@ const FriendsList = () => {
             }
         };
 
-        fetchData();
+        fetchFriendsData();
     }, []);
 
     const handleCloseNotification = () => {
@@ -54,6 +75,11 @@ const FriendsList = () => {
 
     const removeFriendFromList = (friendId) => {
         setFriends(prevFriends => prevFriends.filter(friend => friend.friendId !== friendId));
+        setFriendsCount(prevFriendsCount => {
+            const newCount = { ...prevFriendsCount };
+            delete newCount[friendId];
+            return newCount;
+        });
     };
 
     if (loading) return <div>Loading...</div>;
@@ -63,32 +89,28 @@ const FriendsList = () => {
         <Paper className="friends-list" elevation={3}>
             <h2 className="friends-title">Friends</h2>
             <ul className="friend-list">
-                {friends.map((friend) => {
-                    // Hesaplanan arkadaş sayısını alıyoruz
-                    const friendCount = friends.filter(f => f.friendId === friend.friendId).length;
-                    
-                    return (
-                        <li key={friend.friendId} className="friend-card">
-                            <img 
-                                src={`https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436180.jpg?t=st=1716757233~exp=1716760833~hmac=4bfa8f8a96f4610dbb2dfab9866964687642659632c79903e43f6e33bf94d03f&w=740`} 
-                                alt={friend.friendUsername} 
-                                className="profile-photo-lg"
+                {friends.map((friend) => (
+                    <li key={friend.friendId} className="friend-card">
+                        <img 
+                            src={`https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436180.jpg?t=st=1716757233~exp=1716760833~hmac=4bfa8f8a96f4610dbb2dfab9866964687642659632c79903e43f6e33bf94d03f&w=740`} 
+                            alt={friend.friendUsername} 
+                            className="profile-photo-lg"
+                        />
+                        <div className="card-info">
+                            <h4 className="text-green">{friend.friendUsername}</h4>
+                            <p>{friend.firstName} {friend.lastName}</p>
+                            <p>{friendsCount[friend.friendId] ? `${friendsCount[friend.friendId]} Friends` : '0 Friends'}</p>
+
+                            <UnfollowFriend
+                                friendId={friend.friendId}
+                                removeFriendFromList={removeFriendFromList}
+                                setNotificationType={setNotificationType}
+                                setNotificationMessage={setNotificationMessage}
+                                setNotificationOpen={setNotificationOpen}
                             />
-                            <div className="card-info">
-                                <h4 className="text-green">{friend.friendUsername}</h4>
-                                <p>{friend.firstName} {friend.lastName}</p>
-                                <p>Friends: {friendCount}</p>
-                                <UnfollowFriend
-                                    friendId={friend.friendId}
-                                    removeFriendFromList={removeFriendFromList}
-                                    setNotificationType={setNotificationType}
-                                    setNotificationMessage={setNotificationMessage}
-                                    setNotificationOpen={setNotificationOpen}
-                                />
-                            </div>
-                        </li>
-                    );
-                })}
+                        </div>
+                    </li>
+                ))}
             </ul>
             <Snackbar
                 open={notificationOpen}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Snackbar, Paper, Tabs, Tab } from '@mui/material';
-import SearchUsers from '../SearchUsers/SearchUsers.js';
+
 import FriendsList from '../FriendLists/FriendsList.js';
 import RejectedList from '../FriendLists/RejectedList.js';
 import PendingList from '../FriendLists/PendingList.js';
 import Navbar from "../Navbar/Navbar";
-import './Profile.css'; // Import the CSS file
 import ProfileCard from '../ProfileCard/ProfileCard.js';
+import './Profile.css'; // Import the CSS file
 
 const Profile = () => {
     const [notificationMessage, setNotificationMessage] = useState('');
@@ -14,7 +14,6 @@ const Profile = () => {
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [userId, setUserId] = useState(localStorage.getItem('userId'));
     const [activeTab, setActiveTab] = useState(0);
-    const [activeActivityTab, setActiveActivityTab] = useState(0);
     const [friends, setFriends] = useState([]);
     const [loadingFriends, setLoadingFriends] = useState(true);
     const [comments, setComments] = useState([]);
@@ -144,31 +143,11 @@ const Profile = () => {
         setActiveTab(newValue);
     };
 
-    const handleActivityTabChange = (event, newValue) => {
-        setActiveActivityTab(newValue);
-    };
-
     return (
         <div>
             <Navbar />
             <Box sx={{ padding: '20px' }}>
-                <Paper className="profile-header" elevation={3}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ position: 'relative', display: 'inline-block' }}>
-                            <div style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '50%',
-                                backgroundColor: '#ddd',
-                                marginBottom: '10px',
-                                marginTop: '10px'
-                            }}></div>
-                        </div>
-                        <div>
-                            <ProfileCard/>
-                        </div>
-                    </div>
-                </Paper>
+                <ProfileCard/>
                 <Tabs
                     value={activeTab}
                     onChange={handleTabChange}
@@ -179,6 +158,8 @@ const Profile = () => {
                     <Tab label="Comments" />
                     <Tab label="Posts" />
                     <Tab label="Friends" />
+                    <Tab label="Follow Requests" />
+                    <Tab label="Rejected Requests" />
                 </Tabs>
                 <Paper className="content" elevation={3}>
                     {activeTab === 0 && (
@@ -217,45 +198,22 @@ const Profile = () => {
                         <div className="friends">
                             <h3>Friends</h3>
                             <FriendsList friends={friends} />
+                            
+                        </div>
+                    )}
+                    {activeTab === 3 && (
+                        <div className="follow-requests">
+                            <h3>Follow Requests</h3>
+                            <PendingList />
+                        </div>
+                    )}
+                    {activeTab === 4 && (
+                        <div className="rejected-requests">
+                            <h3>Rejected Requests</h3>
+                            <RejectedList />
                         </div>
                     )}
                 </Paper>
-                {activeTab === 2 && (
-                    <>
-                        <Tabs
-                            value={activeActivityTab}
-                            onChange={handleActivityTabChange}
-                            indicatorColor="secondary"
-                            textColor="secondary"
-                            centered
-                            className="activity-tabs"
-                        >
-                            <Tab label="Pending" />
-                            <Tab label="Rejected" />
-                            <Tab label="Search" />
-                        </Tabs>
-                        <Paper className="content" elevation={3}>
-                            {activeActivityTab === 0 && (
-                                <div className="pending">
-                                    <h3>Pending Requests</h3>
-                                    <PendingList />
-                                </div>
-                            )}
-                            {activeActivityTab === 1 && (
-                                <div className="rejected">
-                                    <h3>Rejected Requests</h3>
-                                    <RejectedList />
-                                </div>
-                            )}
-                            {activeActivityTab === 2 && (
-                                <div className="search-users">
-                                    <h3>Search Users</h3>
-                                    <SearchUsers />
-                                </div>
-                            )}
-                        </Paper>
-                    </>
-                )}
             </Box>
             <Snackbar
                 open={notificationOpen}
