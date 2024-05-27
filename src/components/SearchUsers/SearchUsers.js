@@ -5,6 +5,7 @@ import SendFriendRequest from '../UserActions/SendRequest';
 import Unfollow from '../UserActions/Unfollow';
 import ResendFriendRequest from '../UserActions/SendRequest'; // Updated import
 import UnfollowFriend from '../UserActions/Unfollow';
+import SearchIcon from '@mui/icons-material/Search'; // Import the search icon
 import './SearchUsers.css';
 
 const SearchUsers = () => {
@@ -184,59 +185,64 @@ const SearchUsers = () => {
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                     fullWidth
                 />
-                <Button variant="contained" onClick={handleSearch}>Search</Button>
-                {searchResults.length > 0 && (
-                    <List className="search-results">
-                        {searchResults.map((result) => (
-                            <ListItem className="list-item" key={result.id}>
-                                <Avatar
-                                   src={result?.avatarUrl}// Replace with your avatar URL logic
-                                    alt={result.username}
-                                    className="avatar"
-                                    onClick={() => handleAvatarClick(result.id)}
-                                    style={{ cursor: 'pointer' }}
-                                />
-                                <ListItemText primary={result.username} />
-                                {determineRelationshipStatus(result.id) === 'following' && (
-                                    <>
-                                        <span>Following</span>
-                                        <UnfollowFriend
-                                            friendId={result.id}
-                                            removeFriendFromList={removeFriendFromList}
-                                            setNotificationType={setNotificationType}
-                                            setNotificationMessage={setNotificationMessage}
-                                           
-                                            setNotificationOpen={setNotificationOpen}
-                                            />
-                                        </>
-                                    )}
-                                    {determineRelationshipStatus(result.id) === 'rejected' && (
-                                        <>
-                                            <span>Rejected</span>
-                                            <Button variant="contained" color="primary" onClick={() => handleResendFriendRequest(result.id)}>Oops! Follow Again</Button>
-                                        </>
-                                    )}
-                                    {determineRelationshipStatus(result.id) === 'sent' && (
-                                        <>
-                                            <span>Request Sent</span>
-                                        </>
-                                    )}
-                                    {determineRelationshipStatus(result.id) === 'none' && (
-                                        <Button variant="contained" color="primary" onClick={() => handleSendFriendRequest(result.id)}>Follow</Button>
-                                    )}
-                                </ListItem>
-                            ))}
-                        </List>
-                    )}
-                </Paper>
-                <Snackbar open={notificationOpen} autoHideDuration={6000} onClose={() => setNotificationOpen(false)}>
-                    <Alert onClose={() => setNotificationOpen(false)} severity={notificationType}>
-                        {notificationMessage}
-                    </Alert>
-                </Snackbar>
-            </Box>
-        );
-    };
-    
-    export default SearchUsers;
-    
+                <Button
+                    className="search-button"
+                    variant="contained"
+                    onClick={handleSearch}
+                    startIcon={<SearchIcon />}
+                >
+                
+                </Button>
+            </Paper>
+            {searchResults.length > 0 && (
+                <List className="search-results">
+                    {searchResults.map((result) => (
+                        <ListItem className="list-item" key={result.id}>
+                            <Avatar
+                                src={result?.avatarUrl}
+                                alt={result.username}
+                                className="avatar"
+                                onClick={() => handleAvatarClick(result.id)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                            <ListItemText primary={result.username} />
+                            {determineRelationshipStatus(result.id) === 'following' && (
+                                <>
+                                    <span>Following</span>
+                                    <UnfollowFriend
+                                        friendId={result.id}
+                                        removeFriendFromList={removeFriendFromList}
+                                        setNotificationType={setNotificationType}
+                                        setNotificationMessage={setNotificationMessage}
+                                        setNotificationOpen={setNotificationOpen}
+                                    />
+                                </>
+                            )}
+                            {determineRelationshipStatus(result.id) === 'rejected' && (
+                                <>
+                                    <span>Rejected</span>
+                                    <Button variant="contained" color="primary" onClick={() => handleResendFriendRequest(result.id)}>Oops! Follow Again</Button>
+                                </>
+                            )}
+                            {determineRelationshipStatus(result.id) === 'sent' && (
+                                <>
+                                    <span>Request Sent</span>
+                                </>
+                            )}
+                            {determineRelationshipStatus(result.id) === 'none' && (
+                                <Button variant="contained" color="primary" onClick={() => handleSendFriendRequest(result.id)}>Follow</Button>
+                            )}
+                        </ListItem>
+                    ))}
+                </List>
+            )}
+            <Snackbar open={notificationOpen} autoHideDuration={6000} onClose={() => setNotificationOpen(false)}>
+                <Alert onClose={() => setNotificationOpen(false)} severity={notificationType}>
+                    {notificationMessage}
+                </Alert>
+            </Snackbar>
+        </Box>
+    );
+};
+
+export default SearchUsers;
