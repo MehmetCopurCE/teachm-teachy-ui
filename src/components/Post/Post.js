@@ -57,7 +57,7 @@ const AvatarWrapper = styled(Avatar)(({ theme }) => ({
 }));
 
 function Post(props) {
-  const { title, content, userName, userId, postId, postLikes, createdAt, originalPost, refreshPosts } = props;
+  const { title, content, userName, userId, postId, postLikes, createdAt, originalPost, refreshPosts ,repostTitle,repostContent} = props;
   const [expanded, setExpanded] = useState(false);
   const [likeCounts, setLikeCounts] = useState(postLikes.length);
   const [isLiked, setIsLiked] = useState(false);
@@ -327,8 +327,8 @@ function Post(props) {
                 <Typography variant="h7">
                   <b>{originalPost.username}</b>
                 </Typography>
-                <Typography variant="body1">{originalPost.title}</Typography>
-                <Typography variant="body2">{originalPost.content}</Typography>
+                <Typography variant="body1">{repostTitle}</Typography>
+                <Typography variant="body2">{repostContent}</Typography>
               </CardContent>
             </Card>
           </CardContent>
