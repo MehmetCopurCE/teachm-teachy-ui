@@ -98,6 +98,8 @@ function Home() {
                   postLikes={post.postLikes}
                   userId={post.userId}
                   userName={post.username}
+                  repostTitle={post.repostTitle}
+                  repostContent={post.repostContent}
                   createdAt={new Date(post.createdAt).toLocaleDateString('en-US', {
                     day: '2-digit',
                     month: 'long',
